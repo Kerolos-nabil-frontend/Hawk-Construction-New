@@ -1,0 +1,45 @@
+{
+  "navbar": {
+    "home": "Home",
+    "about": "About",
+    "projects": "Projects",
+    "certificates": "Certificates",
+    "careers": "Careers",
+    "services": "Services",
+    "contact": "Contact",
+    "arabic": "العربية",
+    "english": "English"
+  },
+  "projects": {
+    "title": "Our Projects",
+    "heroDesc": "Delivering landmark projects across Kuwait — from iconic towers to vital infrastructure.",
+    "heroAlt": "Projects Hero",
+    "featured": "Featured Projects",
+    "all": "All Projects",
+    "viewDetails": "View Details",
+    "area": "Area",
+    "scope": "Scope",
+    "contractor": "Contractor",
+    "mainContractor": "Main Contractor",
+    "searchPlaceholder": "Search project...",
+    "category": {
+      "all": "All",
+      "governmental": "Governmental",
+      "hospitals": "Hospitals",
+      "villas": "Villas",
+      "underprocess": "Under Process",
+      "hotels": "Hotels"
+    }
+  },
+  "about": {
+    "title": "About Us",
+    "intro": "At HAWK, we are dedicated to delivering excellence in construction, engineering, and development. Our projects stand as landmarks of innovation, sustainability, and commitment to quality.",
+    "details": "We don’t just build structures — we build trust, long-term partnerships, and solutions that shape the future. With decades of experience across multiple industries, we focus on innovation, safety, and sustainability in every project. Our team combines technical expertise with creative problem-solving to exceed expectations.",
+    "readMore": "Read More",
+    "readLess": "Read Less",
+    "yearsExperience": "Years Experience",
+    "projectsDelivered": "Projects Delivered",
+    "clients": "Clients",
+    "imageAlt": "About HAWK"
+  }
+}

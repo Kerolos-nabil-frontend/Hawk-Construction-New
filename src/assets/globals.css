@@ -1,0 +1,38 @@
+.swiper-slide-transform {
+    transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* Define only one hex value per variable for CSS compatibility */
+:root {
+    --primary-color: #1E4266;
+    --secondary-color: #EFCF96;
+    --background-color: #f3f4f6;
+    --text-color: #111827;
+}
+
+
+
+@font-face {
+    font-family: 'Britannic Bold Regular';
+   src: url("./fonts/britannic-bold-regular.ttf") format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+body {
+    font-family: 'Britannic Bold Regular', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+/* Utility classes for global colors */
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+.bg-secondary {
+    background-color: var(--secondary-color) !important;
+}
+.text-primary {
+    color: var(--primary-color) !important;
+}
+.text-secondary {
+    color: var(--secondary-color) !important;
+}
