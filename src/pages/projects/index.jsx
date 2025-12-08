@@ -38,6 +38,7 @@ import SchoolVideo from "../../assets/videos/Schoolvideo.mp4";
 import NewVideo from "../../assets/videos/NewVideo.mp4";
 import HotelVideo from "../../assets/videos/HotelVideo.mp4";
 import MallVedio from "../../assets/videos/Mall-Vedio.mp4";
+import Hilton from "../../assets/videos/Hilton.mp4";
 import Andalous from "../../assets/videos/AndaVideo.mp4";
 import KuwaitUni from "../../assets/videos/KuwaitUni.mp4";
 import Uni1 from "../../assets/images/Uni1.webp";
@@ -80,6 +81,10 @@ import Building7 from "../../assets/images/Building7.jpeg";
 import Building8 from "../../assets/images/Building8.jpeg";
 import Building9 from "../../assets/images/Building9.jpeg";
 import Building10 from "../../assets/images/Building10.jpeg";
+import Hilton1 from "../../assets/images/Hilton1.jpg";
+import Hilton2 from "../../assets/images/Hilton2.jpg";
+import Hilton3 from "../../assets/images/Hilton3.avif";
+import Hilton4 from "../../assets/images/Hilton4.jpg";
 
 
 
@@ -131,7 +136,7 @@ const featuredProjects = [
 
 const allProjects = [
    {
-    title: "Al Hayaah School sabah Al Salem",
+    title: "Al Hayaah School Sabah Al Salem",
     images: [School1, School2, School3, School4,School5],
     category: "Educational",
     area: "Street 109, Sabah Al Salem, Mubarak Al-Kabeer Governorate",
@@ -139,7 +144,7 @@ const allProjects = [
     contractor:"Aljaidaa international general trading and contracting co.",
   },
    {
-    title: "One international School ",
+    title: "One International School ",
     images: [School6, School7, School8],
     video: SchoolVideo,
     category: "Educational",
@@ -156,6 +161,16 @@ const allProjects = [
     scope:
       "Concrete Screed, Self-Leveling Screed, Curbstones , Walk ways, Concrete Crack Injection, Blockwork, Plaster, Forming, Painting, Steel Reinforcing ,Ceramic Tiles , Lightweight Concrete,Fair Face Treatment, Exterior Plaster Exterior Texture & Landscape",
     contractor: "Impressa Pizarrotti",
+  },
+  {
+    title: "Hilton Al Mangaf Plage 13",
+    images: [Hilton3,Hilton4,Hilton1, Hilton2],
+    video: Hilton,
+    category: "Maintenance and Repair",
+    area: "Mangaf",
+    scope:
+      "All facade Plaster, Precast cladding, Marble cladding",
+    contractor: "",
   },
    {
     title: "Safir AL-Fintas Hotel",
@@ -453,6 +468,7 @@ export default function Projects() {
               "Residents buildings",
               "Villas",
               "Hotels",
+              "Maintenance and Repair",
             ].map((cat) => (
               <button
                 key={cat}
