@@ -1,36 +1,37 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, EffectFade, Pagination } from "swiper/modules";
+import { EffectFade, Pagination, Navigation } from "swiper/modules";
 import { motion } from "framer-motion";
+
 import "swiper/css";
 import "swiper/css/effect-fade";
 import "swiper/css/pagination";
+import "swiper/css/navigation";
 
 import Library from "../../assets/images/Library.jpg";
 import Building from "../../assets/images/Building.jpg";
 import Directorate from "../../assets/images/Directorate.jpg";
 import Bank from "../../assets/images/Bank.jpg";
 
-
 export default function AboutIntro() {
   const { t } = useTranslation();
 
   const slides = [
     {
-      text: "Hany Samir Abdallah began his professional journey in the construction field in 2005, driven by a deep passion for the industry and a strong entrepreneurial spirit. From the beginning, he dedicated himself to expanding his technical knowledge and developing the skills required to lead in project execution and management. His persistence, vision, and continuous pursuit of excellence led to the establishment of Hawk Al Ahlia Contracting Company in 2015.",
+      text: "Eng /Hany Samir Abdallah began his professional journey in the construction field in 2005, driven by a deep passion for the industry and a strong entrepreneurial spirit. From the beginning, he dedicated himself to expanding his technical knowledge and developing the skills required to lead in project execution and management.",
       img: Library,
     },
     {
-      text: "Since the company was founded in 2015, Hawk Al Ahlia has been actively delivering specialized contracting and construction services across a wide range of sectors. Our portfolio includes the development of commercial centers, banks, hotels, resorts, electrical substations, housing cities, mosques, residential buildings, schools, universities, highways, and bridges.",
+      text: "Since the company was founded in 2015, Hawk Al Ahlia has been actively delivering specialized contracting and construction services across a wide range of sectors including commercial centers, banks, hotels, resorts, universities, highways, and bridges.",
       img: Building,
     },
     {
-      text: "Our journey began with a focus on finishing works such as painting, gypsum plaster, cement plaster, and fair face. Over time, we expanded our capabilities to include exterior finish systems and exterior insulation finish systems — always ensuring the same efficiency, precision, and productivity.",
+      text: "Our journey began with a focus on finishing works such as painting, gypsum plaster, cement plaster, and fair face. Over time, we expanded our capabilities to include exterior finish systems and exterior insulation finish systems.",
       img: Directorate,
     },
     {
-      text: "With a highly skilled team and a proven track record of successful project delivery, Hawk Al Ahlia continues to grow and evolve. We remain committed to quality, safety, innovation, and exceeding client expectations in every project we undertake.",
+      text: "With a highly skilled team and a proven track record of successful project delivery, Hawk Al Ahlia continues to grow and evolve while remaining committed to quality, safety, and innovation.",
       img: Bank,
     },
   ];
@@ -39,16 +40,12 @@ export default function AboutIntro() {
     <section className="relative w-full min-h-screen bg-black">
       <Swiper
         effect="fade"
-        autoplay={{
-          delay: 7000,
-          disableOnInteraction: false,
-        }}
+        navigation
         pagination={{
-          clickable: true,
-          bulletActiveClass: "bg-white",
+          type: "progressbar",
         }}
-        modules={[Autoplay, EffectFade, Pagination]}
-        className="w-full h-full"
+        modules={[EffectFade, Pagination, Navigation]}
+        className="w-full h-full about-swiper"
       >
         {slides.map((slide, i) => (
           <SwiperSlide key={i}>
@@ -60,38 +57,29 @@ export default function AboutIntro() {
                 className="absolute inset-0 w-full h-full object-cover brightness-[0.5]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 1.5 }}
+                transition={{ duration: 1.2 }}
               />
 
-              {/* Overlay Gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
 
-              {/* Text Content */}
+              {/* Content */}
               <div className="relative z-10 flex flex-col justify-center items-center h-full text-center px-6 md:px-20">
-                <motion.h1
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 1 }}
-                  className="text-4xl md:text-6xl font-extrabold text-white mb-8 tracking-tight"
-                >
-                  {/* {t("about.title")} */}
-                </motion.h1>
-
                 <motion.p
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 1.2 }}
+                  transition={{ duration: 1 }}
                   className="text-lg md:text-xl text-gray-200 max-w-3xl leading-relaxed"
                 >
                   {slide.text}
                 </motion.p>
 
-                {/* Only on last slide: Stats */}
+                {/* Stats only on last slide */}
                 {i === slides.length - 1 && (
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1.5 }}
+                    transition={{ duration: 1.2 }}
                     className="mt-12 grid grid-cols-3 gap-6 text-white"
                   >
                     {[

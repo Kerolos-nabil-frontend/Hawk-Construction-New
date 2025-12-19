@@ -36,3 +36,66 @@ body {
 .text-secondary {
     color: var(--secondary-color) !important;
 }
+.about-swiper .swiper-pagination-progressbar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.about-swiper .swiper-pagination-progressbar-fill {
+  background: #22d3ee; /* cyan */
+}
+
+/* ============================= */
+/* REMOVE DEFAULT BIG SWIPER ARROWS */
+/* ============================= */
+
+/* Hide Swiper default arrow graphics */
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  display: none !important;
+}
+
+/* Remove any default background / size */
+.swiper-button-next,
+.swiper-button-prev {
+  background: none !important;
+  width: auto !important;
+  height: auto !important;
+  color: white;
+  font-size: 40px;
+  font-weight: 300;
+  transition: color 0.25s ease, transform 0.25s ease;
+}
+
+/* Custom small arrows */
+.swiper-button-next::before {
+  content: "›";
+}
+
+.swiper-button-prev::before {
+  content: "‹";
+}
+
+/* Hover effect (same as Hero) */
+.swiper-button-next:hover,
+.swiper-button-prev:hover {
+  color: #60a5fa; /* blue-400 */
+  transform: scale(1.15);
+}
+
+/* Position */
+.swiper-button-prev {
+  left: 16px;
+}
+
+.swiper-button-next {
+  right: 16px;
+}
+
+/* Mobile size */
+@media (max-width: 768px) {
+  .swiper-button-next,
+  .swiper-button-prev {
+    font-size: 32px;
+  }
+}
