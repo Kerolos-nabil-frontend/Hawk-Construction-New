@@ -85,6 +85,45 @@ import Hilton1 from "../../assets/images/Hilton1.jpg";
 import Hilton2 from "../../assets/images/Hilton2.jpg";
 import Hilton3 from "../../assets/images/Hilton3.avif";
 import Hilton4 from "../../assets/images/Hilton4.jpg";
+import Public1 from "../../assets/images/Public1.jpg";
+import Public2 from "../../assets/images/Public2.jpg";
+import Rasha1 from "../../assets/images/Rasha1.jpeg";
+import Rasha2 from "../../assets/images/Rasha2.jpeg";
+import Rasha3 from "../../assets/images/Rasha3.jpeg";
+import Rasha4 from "../../assets/images/Rasha4.jpeg";
+import Rasha5 from "../../assets/images/Rasha5.jpeg";
+import Rasha6 from "../../assets/images/Rasha6.jpeg";
+import Rasha7 from "../../assets/images/Rasha7.jpeg";
+import Rh1 from "../../assets/images/Rh1.jpeg";
+import Rh2 from "../../assets/images/Rh2.jpeg";
+import Rh3 from "../../assets/images/Rh3.jpeg";
+import Rh4 from "../../assets/images/Rh4.jpeg";
+import Rh5 from "../../assets/images/Rh5.jpeg";
+import Rh6 from "../../assets/images/Rh6.jpeg";
+import Sabah1 from "../../assets/images/Sabah1.jpeg";
+import Sabah2 from "../../assets/images/Sabah2.jpeg";
+import Sabah3 from "../../assets/images/Sabah3.jpeg";
+import Sabah4 from "../../assets/images/Sabah4.jpeg";
+import Place from "../../assets/images/place.jpg";
+import Aknan from "../../assets/images/Aknan.jpg";
+import Taw1 from "../../assets/images/Taw1.jpeg";
+import Taw2 from "../../assets/images/Taw2.jpeg";
+import Taw3 from "../../assets/images/Taw3.jpeg"; 
+import Taw4 from "../../assets/images/Taw4.jpeg";
+import Taw5 from "../../assets/images/Taw5.jpeg";
+import Taw6 from "../../assets/images/Taw6.jpeg";
+import Taw7 from "../../assets/images/Taw7.jpeg";
+import Taw8 from "../../assets/images/Taw8.jpeg";
+import Taw9 from "../../assets/images/Taw9.jpeg";
+
+
+
+
+
+
+
+
+
 
 
 
@@ -264,15 +303,51 @@ const allProjects = [
       "EIFS/ETICS Facades System , Acrylic Render Plaster, Metal Ceiling, Gypsum Board, Acoustic Ceiling, painting, Epoxy Paint ,PU Coating & anti-Carbonation Paint.",
     contractor: "Ahmadiah Contracting & Trading Company.",
   },
+  {
+    title: "Tawbad General Trading and contracting Company.",
+    images: [Taw1, Taw2, Taw3,Taw4,Taw5,Taw6,Taw7,Taw8,Taw9],
+    category: "Governmental",
+    area: "Kuwait City .",
+    scope:
+      "Form Works for Walls,Columns,Columns,Corbles Beams,Ramps, Upstand, Slabs,walk ways,Steel Reinforcement for walls,Columns,Corbles Beams,Ramps,Upstands,Slabs,Wiremesh Casting,Masonary Works,Plaster Works,Ceramic Tiles,Precast Terazzo,Gypsum Board Ceiling,Resiklant Fooring,Painting Works.",
+    contractor: "Tawbad General Trading and contracting Company.",
+  },
   
   {
     title: "Sabah Al-Ahmed City (100 Villas + 3 Mosques).",
     images: [City],
-    category: "Residents buildings",
+    category: "Villas",
     area: "Al-Wafra Area - Kilo 40 Road 306 - Al-Ahmadi Governorate.",
     scope:
       "Concrete forming, Steel reinforcing, Fair Face, Block work, Cement plaster, Painting & Exterior texture.",
     contractor: "M.A.Al Kharafi & Sons Co. W.L.L.",
+  },
+  {
+    title: "Villa Ms.Rasha El Bahar.",
+    images: [Rasha1, Rasha2, Rasha3,Rasha4, Rasha5,Rasha6,Rasha7],
+    category: "Villas",
+    area: "El Shuwaikh.",
+    scope:
+      "External Plaster with Paint Works,  Ceramic & Terazzo Works, Staff Stairs, Internal Painting Works,  Insulation Works.",
+    contractor: " Back Combined General Trading & Contacting Company.",
+  },
+  {
+    title: "Villa RH Residence Package 2.",
+    images: [Rh1, Rh2, Rh3,Rh4, Rh5,Rh6],
+    category: "Villas",
+    area: "El Badaee.",
+    scope:
+      "Sand Cement Plaster,Masonary Works,Concrete Works for MEP Equipments,Internal Paint,Terazzo Tiles,Cement Board Panels,Gypsum Board Ceiling.",
+    contractor: "  IMAR Interiors for General  Building Construction W.L.L.",
+  },
+  {
+    title: "Villa Ms.Sabah El Ghonim.",
+    images: [Sabah1, Sabah2, Sabah3,Sabah4],
+    category: "Villas",
+    area: "El Shuwaikh.",
+    scope:
+      "Internal Gypsum Board System, Internal Wall Cladding Cement Board,Internal&External Painting Works,External Ceiling Works(Glass Panels)",
+    contractor: " Back Combined General Trading & Contacting Company.",
   },
   {
     title: "New Extension Of Al Jahra Hospital.",
@@ -306,6 +381,14 @@ const allProjects = [
     area: "Farwaniya governorate.",
     scope: "EIFS System.",
     contractor: "Limak",
+  },
+  {
+    title: "West Abdullah Al-Mubarak Public Buildings.",
+    images: [Public1,Public2],
+    category: "Governmental",
+    area: "Farwaniya governorate.",
+    scope: "Cement Plaster, Fair Face, Painting & Exterior Rendering.",
+    contractor: "United Building Company.",
   },
   {
     title: "Wafra Villas - (440 Villas).",
@@ -370,6 +453,38 @@ const allProjects = [
     area: "Fintas, Kuwait.",
     scope: "Interior Paint, Ceiling, EIFS Facades.",
     contractor: "Private Client.",
+  },
+  {
+    title: "Villa El Yarmouk.",
+    images: [Place],
+    category: "Villas",
+    area: "El Yarmouk.",
+    scope: "Eifs Works.",
+    contractor: "Private Client Mr. Bassem Soliman El Ataby.",
+  },
+  {
+    title: "Villa Mr. Saleh Ahmed Al Sarhaan.",
+    images: [Place],
+    category: "Villas",
+    area: "El Khaldiya.",
+    scope: "Eifs Works.",
+    contractor: " Back Combined General Trading & Contacting Company.",
+  },
+  {
+    title: "Old Kuwait University.",
+    images: [Uni3],
+    category: "Maintenance and Repair",
+    area: "Al Shuwaikh Indsustrial.",
+    scope: "All Maintenance & Repair Works for Block 4.",
+    contractor: "K.C.C. Engineering & Construction Company.",
+  },
+  {
+    title: "Aknan Tower.",
+    images: [Aknan],
+    category: "Maintenance and Repair",
+    area: "Salmyia.",
+    scope: "Façade Referbuishment (Demolish,Masonary,Plaster,Paint).",
+    contractor: "Cmbc Construction Management & Building Company.",
   },
 ];
 

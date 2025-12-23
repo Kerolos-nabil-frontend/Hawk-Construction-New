@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { X } from "lucide-react"; 
 
 export default function ContactUs() {
   const [formData, setFormData] = useState({
@@ -41,16 +40,17 @@ export default function ContactUs() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-16 px-4 lg:px-24">
+      {/* Header */}
       <div className="max-w-4xl mx-auto text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
         <p className="text-lg text-gray-600">
-          We’d love to hear from you. Whether you have a project idea, a question, or just want to say hi — reach out and we’ll get back to you promptly.
+          We’d love to hear from you. Reach out and we’ll get back to you promptly.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-7xl mx-auto">
         
-        {/* ✅ Contact Form */}
+        {/* Contact Form */}
         <div className="bg-white shadow-lg rounded-xl p-8">
           {submitted ? (
             <div className="text-center">
@@ -62,134 +62,130 @@ export default function ContactUs() {
               </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} noValidate>
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Name
+            <form onSubmit={handleSubmit} noValidate className="space-y-4">
+              {["name", "email", "subject"].map((field) => (
+                <div key={field}>
+                  <label className="block text-sm font-medium text-gray-700 capitalize">
+                    {field}
                   </label>
                   <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
+                    type={field === "email" ? "email" : "text"}
+                    name={field}
+                    value={formData[field]}
                     onChange={handleChange}
-                    className={`mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.name ? "border-red-500" : "border-gray-300"
+                    className={`mt-1 block w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      errors[field] ? "border-red-500" : "border-gray-300"
                     }`}
                   />
-                  {errors.name && (
-                    <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                  {errors[field] && (
+                    <p className="text-red-500 text-sm mt-1">{errors[field]}</p>
                   )}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className={`mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.email ? "border-red-500" : "border-gray-300"
-                    }`}
-                  />
-                  {errors.email && (
-                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Subject
-                  </label>
-                  <input
-                    type="text"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    className={`mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.subject ? "border-red-500" : "border-gray-300"
-                    }`}
-                  />
-                  {errors.subject && (
-                    <p className="text-red-500 text-sm mt-1">{errors.subject}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Message
-                  </label>
-                  <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    rows={5}
-                    className={`mt-1 block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.message ? "border-red-500" : "border-gray-300"
-                    }`}
-                  ></textarea>
-                  {errors.message && (
-                    <p className="text-red-500 text-sm mt-1">{errors.message}</p>
-                  )}
-                </div>
+              ))}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Message
+                </label>
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  rows={5}
+                  className={`mt-1 block w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                    errors.message ? "border-red-500" : "border-gray-300"
+                  }`}
+                />
+                {errors.message && (
+                  <p className="text-red-500 text-sm mt-1">{errors.message}</p>
+                )}
               </div>
 
-              <div className="mt-6">
-                <button
-                  type="submit"
-                  className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition"
-                >
-                  Send Message
-                </button>
-              </div>
+              <button
+                type="submit"
+                className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
+              >
+                Send Message
+              </button>
             </form>
           )}
         </div>
 
-        {/* ✅ Contact Details */}
-        <div className="space-y-8">
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Get in Touch</h2>
-            <div className="space-y-3 text-gray-700">
-              <p>
-                <strong>Email:</strong>{" "}
-                <a href="mailto:contact@hawk.com" className="text-blue-600 hover:underline">
-                  contact@hawk.com
-                </a>
-              </p>
-              <p>
-                <strong>Phone:</strong>{" "}
-                <a href="tel:+96522458183" className="text-blue-600 hover:underline">
-                  +965 22458183
-                </a>
-                <br />
-                <a href="tel:+96590001448" className="text-blue-600 hover:underline">
-                  +965 90001448
-                </a>
-                <br />
-                {/* ✅ WhatsApp Number */}
-                <a
-                  href="https://wa.me/98765314"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600  hover:underline"
-                >
-                 <span className="text-black">WhatsApp:</span>  +98765314
-                </a>
-              </p>
-              <p>
-                <strong>Address:</strong>{" "}
-                <a
-                  href="https://www.google.com/maps?q=Al+'Asimah+Governorate,+Sharq,+Mubarak+Al-Kabeer+St.,+Block+No.6,+Maryam+Tower,+14th+Floor"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
-                >
-                  Al 'Asimah Governorate, Sharq, Mubarak Al-Kabeer St., Block No.6, Maryam
-                  Tower, 14th Floor
-                </a>
-              </p>
-            </div>
+        {/* Contact Details */}
+        <div className="bg-white rounded-xl shadow-lg p-8 space-y-6">
+          <h2 className="text-2xl font-semibold text-gray-900">
+            Get in Touch
+          </h2>
+
+          <p className="text-gray-700">
+            <strong>Email:</strong>{" "}
+            <a href="mailto:info@hawkahlia.com" className="text-blue-600 hover:underline">
+              info@hawkahlia.com
+            </a>
+          </p>
+
+          {/* Kuwait Branch - UNCHANGED */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Kuwait Branch
+            </h3>
+            <p className="text-gray-700">
+              <strong>Phone:</strong>{" "}
+              <a href="tel:+96522458183" className="text-blue-600 hover:underline">
+                +965 22458183
+              </a>
+              <br />
+              <a href="tel:+96590001448" className="text-blue-600 hover:underline">
+                +965 90001448
+              </a>
+            </p>
+            <p className="text-gray-700">
+              <strong>WhatsApp:</strong>{" "}
+              <a
+                href="https://wa.me/98765314"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                +98765314
+              </a>
+            </p>
+            <p className="text-gray-700">
+              <strong>Address:</strong>{" "}
+              <a
+                href="https://www.google.com/maps?q=Al+'Asimah+Governorate,+Sharq,+Mubarak+Al-Kabeer+St.,+Block+No.6,+Maryam+Tower,+14th+Floor"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                Al 'Asimah Governorate, Sharq, Mubarak Al-Kabeer St., Block No.6,
+                Maryam Tower, 14th Floor
+              </a>
+            </p>
+          </div>
+
+          {/* UAE Branch - UPDATED MAP ONLY */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              U.A.E Branch
+            </h3>
+            <p className="text-gray-700">
+              <strong>Phone:</strong>{" "}
+              <a href="tel:+971502572582" className="text-blue-600 hover:underline">
+                +971 502572582
+              </a>
+            </p>
+            <p className="text-gray-700">
+              <strong>Address:</strong>{" "}
+              <a
+                href="https://www.google.com/maps?q=Dubai,+United+Arab+Emirates"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                Dubai, United Arab Emirates
+              </a>
+            </p>
           </div>
         </div>
       </div>

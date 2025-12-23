@@ -31,7 +31,7 @@ export default function AboutIntro() {
       img: Directorate,
     },
     {
-      text: "With a highly skilled team and a proven track record of successful project delivery, Hawk Al Ahlia continues to grow and evolve while remaining committed to quality, safety, and innovation.",
+      text: "With a highly skilled team and a proven track record of successful project delivery, Hawk Al Ahlia continues to grow and evolve, and now we are also operating our New branch at Dubai U.A.E. maintaining all our services overseas from Kuwait to United Arab Emirates committed to quality, safety, innovation, and exceeding client expectations in every project we undertake.",
       img: Bank,
     },
   ];
