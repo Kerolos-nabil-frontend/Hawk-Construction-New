@@ -13,6 +13,7 @@ import Library from "../../assets/images/Library.jpg";
 import Building from "../../assets/images/Building.jpg";
 import Directorate from "../../assets/images/Directorate.jpg";
 import Bank from "../../assets/images/Bank.jpg";
+import SEO from "../../components/SEO";
 
 export default function AboutIntro() {
   const { t } = useTranslation();
@@ -38,6 +39,12 @@ export default function AboutIntro() {
 
   return (
     <section className="relative w-full min-h-screen bg-black">
+      <SEO
+        title="About Hawk Al Ahlia - Company Profile"
+        description="Learn about Hawk Al Ahlia. Discover our mission, vision, and commitment to excellence in construction and contracting."
+        keywords="Hawk Al Ahlia, about us, company, profile, history"
+        ogUrl="/about"
+      />
       <Swiper
         effect="fade"
         navigation

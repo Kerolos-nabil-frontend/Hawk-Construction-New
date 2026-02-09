@@ -1,3 +1,26 @@
 
-User-Agent: *
+# Robots.txt for Hawk Al Ahlia
+# Optimized for Google discovery with "Hawk" and "Hawk Al Ahlia" keywords
+
+User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /private
+Disallow: /api
+Disallow: /*.json$
+Disallow: /*.php$
+
+# Allow specific search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Crawl delay
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://www.hawkalahlia.com/sitemap.xml
+
+# Comment: Ensure Googlebot can crawl all content for indexing

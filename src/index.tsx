@@ -1,4 +1,5 @@
 import { createRoot } from 'react-dom/client'
+import { HelmetProvider } from 'react-helmet-async';
 
 import 'tailwindcss/tailwind.css'
 import './assets/globals.css'
@@ -16,7 +17,9 @@ const queryClient = new QueryClient();
 root.render(
 	<I18nextProvider i18n={i18n}>
 		<QueryClientProvider client={queryClient}>
-			<App />
+			<HelmetProvider>
+				<App />
+			</HelmetProvider>
 		</QueryClientProvider>
 	</I18nextProvider>
 );

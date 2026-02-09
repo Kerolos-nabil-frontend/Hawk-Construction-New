@@ -18,13 +18,25 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 
 const api = axios.create({
-  baseURL: 'https://subintroductive-smashable-scottie.ngrok-free.dev',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5026/api',
   headers: {
     'Content-Type': 'application/json',
-    'ngrok-skip-browser-warning': '1', // 👈 This disables ngrok browser warning
   },
   timeout: 10000, // avoid hanging requests
 });
+
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 api.interceptors.response.use(
   response => response,

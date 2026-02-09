@@ -1,12 +1,15 @@
 import React, { useState } from "react";
+import api from "../../utils/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { Briefcase, MapPin, XCircle } from "lucide-react";
 
 export default function Careers() {
   const [selectedJob, setSelectedJob] = useState(null);
-  const [formData, setFormData] = useState({ name: "", cv: null, coverLetter: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", coverLetter: "", cv: null });
   const [showModal, setShowModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorSubmit, setErrorSubmit] = useState("");
 
   const vacancies = [
     { id: 1, title: "Civil Engineer", location: "Kuwait", type: "Full-time" },
@@ -19,23 +22,44 @@ export default function Careers() {
   const handleApply = (job) => {
     setSelectedJob(job);
     setShowModal(true);
+    setErrorSubmit("");
   };
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    setFormData({ ...formData, [name]: files ? files[0] : value });
+    setFormData(prev => ({ ...prev, [name]: files ? files[0] : value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.cv || !formData.coverLetter) {
+    setErrorSubmit("");
+
+    if (!formData.name || !formData.email || !formData.cv || !formData.coverLetter) {
       alert("Please fill in all fields before submitting.");
       return;
     }
-    setShowModal(false);
-    setShowSuccess(true);
-    setFormData({ name: "", cv: null, coverLetter: "" });
-    setTimeout(() => setShowSuccess(false), 3000);
+
+    setLoading(true);
+    const data = new FormData();
+    data.append("Email", formData.email);
+    data.append("Subject", `Job Application: ${selectedJob.title}`);
+    data.append("Body", `Applicant Name: ${formData.name}\n\nCover Letter:\n${formData.coverLetter}`);
+    data.append("CV", formData.cv);
+
+    try {
+      await api.post("/Career/Apply", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setShowModal(false);
+      setShowSuccess(true);
+      setFormData({ name: "", email: "", coverLetter: "", cv: null });
+      setTimeout(() => setShowSuccess(false), 3000);
+    } catch (err) {
+      console.error(err);
+      setErrorSubmit("Failed to submit application. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -132,6 +156,7 @@ export default function Careers() {
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-5">
+                {errorSubmit && <p className="text-red-500 text-sm text-center">{errorSubmit}</p>}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Full Name
@@ -142,6 +167,21 @@ export default function Careers() {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Your full name"
+                    className="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Your email address"
                     className="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     required
                   />
@@ -186,9 +226,10 @@ export default function Careers() {
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    disabled={loading}
+                    className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
                   >
-                    Submit
+                    {loading ? "Submitting..." : "Submit"}
                   </button>
                 </div>
               </form>
