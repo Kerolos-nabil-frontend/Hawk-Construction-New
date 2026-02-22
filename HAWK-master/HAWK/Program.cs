@@ -1,4 +1,5 @@
-﻿using HAWK.dbcontext;
+﻿using System.IO;
+using HAWK.dbcontext;
 using HAWK.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -98,7 +99,7 @@ async Task SeedRolesAndAdminAsync()
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
 
-    string[] roles = { "Admin", "User" };
+    string[] roles = { "SuperAdmin", "Admin", "User", "Main Admin" };
 
     foreach (var role in roles)
     {
@@ -115,18 +116,18 @@ async Task SeedRolesAndAdminAsync()
 
     if (adminUser == null)
     {
-        var admin = new AppUser
+        var SuperAdmin = new AppUser
         {
             UserName = adminEmail,
             Email = adminEmail,
             FullName = "Super Admin"
         };
 
-        var result = await userManager.CreateAsync(admin, adminPassword);
+        var result = await userManager.CreateAsync(SuperAdmin, adminPassword);
 
         if (result.Succeeded)
         {
-            await userManager.AddToRoleAsync(admin, "Admin");
+            await userManager.AddToRoleAsync(SuperAdmin, "SuperAdmin");
         }
         else
         {
@@ -144,6 +145,22 @@ SeedRolesAndAdminAsync().GetAwaiter().GetResult();
 // app.UseHttpsRedirection(); // enable later if needed
 
 app.UseCors("AllowAll");
+
+// Serve static files from wwwroot
+app.UseStaticFiles();
+
+// Serve uploaded files from "server" directory
+var serverPath = Path.Combine(Directory.GetCurrentDirectory(), "server");
+if (!Directory.Exists(serverPath))
+{
+    Directory.CreateDirectory(serverPath);
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(serverPath),
+    RequestPath = "/server"
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

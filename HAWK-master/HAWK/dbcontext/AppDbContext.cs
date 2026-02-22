@@ -14,5 +14,13 @@ namespace HAWK.dbcontext
         public DbSet<Project> Projects { get; set; }
         public DbSet<Certificate> Certificates { get; set; }
         public DbSet<Slider> Sliders { get; set; }
+        public DbSet<WebsiteSettings> WebsiteContents { get; set; }
+        public DbSet<ProjectImage> ProjectImages { get; set; }
+        public DbSet<SliderImage> SliderImages { get; set; }
+        public DbSet<ContactInfo> ContactInfos { get; set; }
+        public DbSet<Career> Careers { get; set; }
+        public DbSet<Service> Services { get; set; }
+        public DbSet<Branch> Branches { get; set; }
+
     }
 }

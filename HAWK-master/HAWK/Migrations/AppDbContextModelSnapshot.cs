@@ -91,6 +91,83 @@ namespace HAWK.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("HAWK.Models.Branch", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ContactInfoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MapLink")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone1")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone2")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Whatsapp")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContactInfoId");
+
+                    b.ToTable("Branches");
+                });
+
+            modelBuilder.Entity("HAWK.Models.Career", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<DateTime>("createdAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("isActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("Careers");
+                });
+
             modelBuilder.Entity("HAWK.Models.Certificate", b =>
                 {
                     b.Property<int>("id")
@@ -98,6 +175,9 @@ namespace HAWK.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<string>("category")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("description")
                         .IsRequired()
@@ -107,6 +187,12 @@ namespace HAWK.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("linkedProjectIds")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("linkedServiceIds")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -114,6 +200,55 @@ namespace HAWK.Migrations
                     b.HasKey("id");
 
                     b.ToTable("Certificates");
+                });
+
+            modelBuilder.Entity("HAWK.Models.ContactInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KuwaitAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KuwaitMapLink")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KuwaitPhone1")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KuwaitPhone2")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("KuwaitWhatsapp")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UaeAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UaeMapLink")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UaePhone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ContactInfos");
                 });
 
             modelBuilder.Entity("HAWK.Models.Project", b =>
@@ -128,12 +263,21 @@ namespace HAWK.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("category")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("contractor")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("image")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("linkedCertificate")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("owner")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("scope")
@@ -153,6 +297,57 @@ namespace HAWK.Migrations
                     b.ToTable("Projects");
                 });
 
+            modelBuilder.Entity("HAWK.Models.ProjectImage", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("image")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("ProjectImages");
+                });
+
+            modelBuilder.Entity("HAWK.Models.Service", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<string>("description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("image")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("linkedCertificate")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("linkedProjectIds")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("Services");
+                });
+
             modelBuilder.Entity("HAWK.Models.Slider", b =>
                 {
                     b.Property<int>("id")
@@ -160,6 +355,9 @@ namespace HAWK.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<int>("SliderLocationID")
+                        .HasColumnType("int");
 
                     b.Property<string>("heading")
                         .IsRequired()
@@ -180,6 +378,49 @@ namespace HAWK.Migrations
                     b.HasKey("id");
 
                     b.ToTable("Sliders");
+                });
+
+            modelBuilder.Entity("HAWK.Models.SliderImage", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<int>("SliderId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("image")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("SliderId");
+
+                    b.ToTable("SliderImages");
+                });
+
+            modelBuilder.Entity("HAWK.Models.WebsiteSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("WebsiteContents");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -315,6 +556,37 @@ namespace HAWK.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("HAWK.Models.Branch", b =>
+                {
+                    b.HasOne("HAWK.Models.ContactInfo", null)
+                        .WithMany("Branches")
+                        .HasForeignKey("ContactInfoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("HAWK.Models.ProjectImage", b =>
+                {
+                    b.HasOne("HAWK.Models.Project", "Project")
+                        .WithMany("Images")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("HAWK.Models.SliderImage", b =>
+                {
+                    b.HasOne("HAWK.Models.Slider", "Slider")
+                        .WithMany("Images")
+                        .HasForeignKey("SliderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Slider");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -364,6 +636,21 @@ namespace HAWK.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("HAWK.Models.ContactInfo", b =>
+                {
+                    b.Navigation("Branches");
+                });
+
+            modelBuilder.Entity("HAWK.Models.Project", b =>
+                {
+                    b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("HAWK.Models.Slider", b =>
+                {
+                    b.Navigation("Images");
                 });
 #pragma warning restore 612, 618
         }

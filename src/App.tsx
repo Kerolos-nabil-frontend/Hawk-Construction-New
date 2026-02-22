@@ -8,12 +8,13 @@ import Services from "./pages/services";
 import Contact from "./pages/contact";
 import { Footer } from "components/Footer";
 import Careers from "pages/careers";
-import SiteMapSwiper from "pages/site-map";
 import Login from "pages/auth/Login";
 import Register from "pages/auth/Register";
 import Dashboard from "pages/dashboard";
 import { useGlobalSEO } from "./hooks/useGlobalSEO";
 import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import DynamicTheme from "./components/DynamicTheme";
 
 import { useEffect } from "react";
 import { useTranslation } from 'react-i18next';
@@ -32,6 +33,7 @@ function App() {
 
   return (
     <Router>
+      <DynamicTheme />
       <AuthProvider>
         <Navbar direction={direction} />
         <div className="p-2" dir={direction}>
@@ -41,11 +43,17 @@ function App() {
             <Route path="/projects" element={<Projects />} />
             <Route path="/certificates" element={<CertificatesPage />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            {/* Protected Dashboard Route */}
+            <Route element={<ProtectedRoute allowedRoles={['Admin', 'Main Admin', 'User']} />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+            </Route>
+
+            {/* Admin Management Route */}
+            <Route element={<ProtectedRoute allowedRoles={['Main Admin', 'SuperAdmin']} />}>
+              <Route path="/register" element={<Register />} />
+            </Route>
             <Route path="/careers" element={<Careers />} />
             <Route path="/services" element={<Services />} />
-            <Route path="/sitemap" element={<SiteMapSwiper />} />
             <Route path="/contact" element={<Contact />} />
           </Routes>
         </div>

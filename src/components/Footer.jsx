@@ -3,15 +3,15 @@ import { FaFacebookF, FaTwitter, FaLinkedinIn } from "react-icons/fa";
 
 export const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-gray-300 pt-16 pb-8 relative">
+    <footer className="bg-primary text-gray-300 pt-16 pb-8 relative">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div className="md:col-span-2">
-            <h2 className="text-3xl font-bold text-blue-500 mb-4">HAWK</h2>
+            <h2 className="text-3xl font-bold text-secondary mb-4">HAWK</h2>
             <p className="max-w-md mb-6">
-              Leading global engineering and construction contractor focused on
-              infrastructure, industrial, and high-end commercial projects.
+              Leading Global Engineering and Construction Contractor Focused on
+              Infrastructure, Industrial, and High-End Commercial Projects.
             </p>
 
           </div>
@@ -23,7 +23,7 @@ export const Footer = () => {
               <li>
                 <Link
                   to="/services"
-                  className="hover:text-blue-400 transition-colors"
+                  className="hover:text-secondary transition-colors"
                 >
                   General Construction
                 </Link>
@@ -31,7 +31,7 @@ export const Footer = () => {
               <li>
                 <Link
                   to="/services"
-                  className="hover:text-blue-400 transition-colors"
+                  className="hover:text-secondary transition-colors"
                 >
                   Project Management
                 </Link>
@@ -39,7 +39,7 @@ export const Footer = () => {
               <li>
                 <Link
                   to="/services"
-                  className="hover:text-blue-400 transition-colors"
+                  className="hover:text-secondary transition-colors"
                 >
                   Engineering
                 </Link>
@@ -47,7 +47,7 @@ export const Footer = () => {
               <li>
                 <Link
                   to="/services"
-                  className="hover:text-blue-400 transition-colors"
+                  className="hover:text-secondary transition-colors"
                 >
                   Consulting
                 </Link>
@@ -62,7 +62,7 @@ export const Footer = () => {
               <li>
                 <Link
                   to="/about"
-                  className="hover:text-blue-400 transition-colors"
+                  className="hover:text-secondary transition-colors"
                 >
                   About Us
                 </Link>
@@ -70,7 +70,7 @@ export const Footer = () => {
               <li>
                 <Link
                   to="/projects"
-                  className="hover:text-blue-400 transition-colors"
+                  className="hover:text-secondary transition-colors"
                 >
                   Our Projects
                 </Link>
@@ -78,7 +78,7 @@ export const Footer = () => {
               <li>
                 <Link
                   to="/careers"
-                  className="hover:text-blue-400 transition-colors"
+                  className="hover:text-secondary transition-colors"
                 >
                   Careers
                 </Link>
@@ -86,7 +86,7 @@ export const Footer = () => {
               <li>
                 <Link
                   to="/contact"
-                  className="hover:text-blue-400 transition-colors"
+                  className="hover:text-secondary transition-colors"
                 >
                   Contact Us
                 </Link>
@@ -96,17 +96,17 @@ export const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-800 pt-6 text-center text-sm">
+        <div className="border-t border-secondary/30 pt-6 text-center text-sm">
           <p>
             © {new Date().getFullYear()} HAWK. All rights reserved. |{" "}
             <a
               href="/privacy"
-              className="hover:text-blue-400 transition-colors"
+              className="hover:text-secondary transition-colors"
             >
               Privacy Policy
             </a>{" "}
             |{" "}
-            <a href="/terms" className="hover:text-blue-400 transition-colors">
+            <a href="/terms" className="hover:text-secondary transition-colors">
               Terms of Service
             </a>
           </p>

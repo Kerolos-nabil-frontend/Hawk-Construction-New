@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import logo from "../assets/images/logo.png";
+import logo from "../assets/images/logo.jpg";
+import logo2 from "../assets/images/Logo2.jpeg";
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar({ direction = "ltr" }) {
@@ -31,7 +32,7 @@ export default function Navbar({ direction = "ltr" }) {
         minute: "2-digit",
         second: "2-digit",
         hour12: true,
-        timeZone: "Africa/Cairo",
+        timeZone: "Asia/Kuwait",
       };
 
       const dateOptions = {
@@ -58,20 +59,30 @@ export default function Navbar({ direction = "ltr" }) {
     { name: t('navbar.certificates'), path: "/certificates" },
     { name: t('navbar.careers'), path: "/careers" },
     { name: t('navbar.services'), path: "/services" },
-    { name: "Sitemap", path: "/sitemap" },
     { name: t('navbar.contact'), path: "/contact" },
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 w-full bg-white/80 backdrop-blur-md shadow z-50`} dir={direction}>
-      <div className="max-w-7xl mx-auto px-4 flex justify-between items-center h-20">
+    <nav className={`fixed top-0 left-0 w-full bg-gray-50 shadow z-50`} dir={direction}>
+      <div className="max-w-7xl mx-auto px-4 flex justify-between items-center h-20 md:h-24">
 
 
         <Link
           to="/"
-          className="flex items-center gap-2 text-2xl font-bold text-blue-600"
+          className="flex items-center"
         >
-          <img src={logo} alt="HAWK Logo" className="h-25 w-25 object-contain" />
+          <div className="flex items-center gap-0.5 md:gap-1 select-none">
+            <img
+              src={logo}
+              alt="HAWK Logo Image"
+              className="h-10 md:h-14 w-auto object-contain"
+            />
+            <img
+              src={logo2}
+              alt="HAWK Logo Text"
+              className="h-9 md:h-12 w-auto object-contain"
+            />
+          </div>
         </Link>
 
 
@@ -82,7 +93,7 @@ export default function Navbar({ direction = "ltr" }) {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`relative font-medium transition-colors duration-300 ${isActive ? "text-blue-600" : "text-gray-700 hover:text-blue-600"
+                className={`relative font-medium transition-colors duration-300 ${isActive ? "text-primary" : "text-gray-700 hover:text-primary"
                   }`}
               >
                 {item.name}
@@ -93,12 +104,6 @@ export default function Navbar({ direction = "ltr" }) {
           {/* Auth Buttons */}
           {user ? (
             <>
-              <Link
-                to="/dashboard"
-                className="ml-4 px-4 py-2 rounded-lg bg-blue-100 text-blue-600 font-semibold hover:bg-blue-200 transition"
-              >
-                Dashboard
-              </Link>
               <button
                 onClick={handleLogout}
                 className="ml-2 px-4 py-2 rounded-lg text-gray-700 font-medium hover:text-red-600 transition"
@@ -106,22 +111,7 @@ export default function Navbar({ direction = "ltr" }) {
                 Logout
               </button>
             </>
-          ) : (
-            <div className="ml-4 flex gap-2">
-              <Link
-                to="/login"
-                className="px-4 py-2 rounded-lg text-gray-700 font-medium hover:text-blue-600 transition"
-              >
-                Login
-              </Link>
-              <Link
-                to="/register"
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
-              >
-                Register
-              </Link>
-            </div>
-          )}
+          ) : null}
 
 
           {/* ✅ Kuwait Date & Time */}
@@ -133,7 +123,7 @@ export default function Navbar({ direction = "ltr" }) {
 
         {/* ✅ Mobile Menu Button */}
         <button
-          className="md:hidden text-gray-700 hover:text-blue-600"
+          className="md:hidden text-gray-700 hover:text-primary"
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? <X size={28} /> : <Menu size={28} />}
@@ -151,7 +141,7 @@ export default function Navbar({ direction = "ltr" }) {
                   key={item.name}
                   to={item.path}
                   onClick={() => setIsOpen(false)}
-                  className={`relative font-medium ${isActive ? "text-blue-600" : "text-gray-700 hover:text-blue-600"
+                  className={`relative font-medium ${isActive ? "text-primary" : "text-gray-700 hover:text-primary"
                     }`}
                 >
                   {item.name}
@@ -162,13 +152,6 @@ export default function Navbar({ direction = "ltr" }) {
             {/* Mobile Auth Buttons */}
             {user ? (
               <>
-                <Link
-                  to="/dashboard"
-                  onClick={() => setIsOpen(false)}
-                  className="mt-4 px-4 py-2 rounded-lg bg-blue-100 text-blue-600 font-semibold hover:bg-blue-200 transition w-3/4 text-center"
-                >
-                  Dashboard
-                </Link>
                 <button
                   onClick={handleLogout}
                   className="mt-2 px-4 py-2 rounded-lg text-red-600 font-medium hover:bg-red-50 transition w-3/4 text-center"
@@ -176,24 +159,7 @@ export default function Navbar({ direction = "ltr" }) {
                   Logout
                 </button>
               </>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  onClick={() => setIsOpen(false)}
-                  className="mt-4 px-4 py-2 rounded-lg text-gray-700 font-medium hover:text-blue-600 transition"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition w-3/4 text-center"
-                >
-                  Register
-                </Link>
-              </>
-            )}
+            ) : null}
 
             {/* ✅ Kuwait Time & Date */}
             <div className="mt-4 text-center text-sm text-gray-600">

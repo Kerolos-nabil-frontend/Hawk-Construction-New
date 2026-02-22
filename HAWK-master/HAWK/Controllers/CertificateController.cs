@@ -16,19 +16,30 @@ namespace HAWK.Controllers
         {
             _context = context;
         }
-        // GET: api/certificate
+        // GET: api/project
+        // GET: api/certificate/GetAll?type=certificate
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] string type)
+        public async Task<IActionResult> GetAll([FromQuery] string? type = null)
         {
             var query = _context.Certificates.AsQueryable();
+
             if (!string.IsNullOrEmpty(type))
             {
-                query = query.Where(c => c.category == type.ToLower());
+                // Assuming 'category' stores 'certificate' or 'reference'
+                // Treat null as 'certificate' for legacy compatibility
+                if (type == "certificate")
+                {
+                    query = query.Where(c => c.category == type || c.category == null);
+                }
+                else
+                {
+                    query = query.Where(c => c.category == type);
+                }
             }
+
             var certificates = await query.ToListAsync();
             return Ok(certificates);
         }
-
         // GET: api/certificate/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
@@ -39,9 +50,8 @@ namespace HAWK.Controllers
 
             return Ok(certificate);
         }
-
         // POST: api/certificate
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "SuperAdmin,Admin,Main Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] CertificateCreateDto dto)
         {
@@ -65,7 +75,9 @@ namespace HAWK.Controllers
                 title = dto.title,
                 description = dto.description,
                 image = "/server/" + fileName,
-                category = dto.category?.ToLower() ?? "certificate"
+                category = dto.category, // Save category
+                linkedProjectIds = dto.linkedProjectIds,
+                linkedServiceIds = dto.linkedServiceIds
             };
 
             _context.Certificates.Add(certificate);
@@ -73,9 +85,8 @@ namespace HAWK.Controllers
 
             return CreatedAtAction(nameof(GetAll), new { id = certificate.id }, certificate);
         }
-
         // PUT: api/certificate/{id}
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "SuperAdmin,Admin,Main Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromForm] CertificateCreateDto dto)
         {
@@ -107,10 +118,9 @@ namespace HAWK.Controllers
 
             certificate.title = dto.title;
             certificate.description = dto.description;
-            if (!string.IsNullOrEmpty(dto.category))
-            {
-                certificate.category = dto.category.ToLower();
-            }
+            certificate.category = dto.category; // Update category
+            certificate.linkedProjectIds = dto.linkedProjectIds;
+            certificate.linkedServiceIds = dto.linkedServiceIds;
 
             await _context.SaveChangesAsync();
 
@@ -118,7 +128,7 @@ namespace HAWK.Controllers
         }
 
         // DELETE: api/certificate/{id}
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "SuperAdmin,Admin,Main Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

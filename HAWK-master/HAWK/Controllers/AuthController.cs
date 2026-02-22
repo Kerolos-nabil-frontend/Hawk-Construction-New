@@ -46,12 +46,16 @@ public class AuthController : ControllerBase
         if (!result.Succeeded)
             return BadRequest(result.Errors);
 
-        // Assign Role
-        string role = !string.IsNullOrEmpty(dto.Role) && (dto.Role == "Admin" || dto.Role == "User") 
-                      ? dto.Role 
-                      : "User";
-                      
-        await _userManager.AddToRoleAsync(user, role);
+        // Assign default role
+        // Assign role from DTO or default to "User"
+        var finalRole = !string.IsNullOrEmpty(dto.Role) ? dto.Role : "User";
+
+        if (!await _roleManager.RoleExistsAsync(finalRole))
+        {
+            await _roleManager.CreateAsync(new IdentityRole(finalRole));
+        }
+
+        await _userManager.AddToRoleAsync(user, finalRole);
 
         return Ok("User registered successfully");
     }
@@ -70,9 +74,16 @@ public class AuthController : ControllerBase
         if (!isPasswordValid)
             return Unauthorized("Invalid email or password");
 
+        var roles = await _userManager.GetRolesAsync(user);
         var token = await GenerateToken(user);
-        return Ok(new { token });
+
+        return Ok(new
+        {
+            token,
+            roles
+        });
     }
+
 
     // =========================
     // JWT TOKEN

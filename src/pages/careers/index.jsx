@@ -2,22 +2,54 @@ import React, { useState } from "react";
 import api from "../../utils/api";
 import { motion, AnimatePresence } from "framer-motion";
 import { Briefcase, MapPin, XCircle } from "lucide-react";
+import { vacancies as staticVacancies } from "../../data/careers";
+import { getAllCareers } from "../../utils/useServices";
+import HeroSlider from "../../components/HeroSlider";
+
+const defaultCareerSlide = [
+  {
+    id: 'static-career-hero',
+    image: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=2071&auto=format&fit=crop',
+    heading: 'Join Our Team',
+    text: 'Build your career with HAWK — where innovation meets opportunity.'
+  }
+];
 
 export default function Careers() {
+  const { data: apiVacancies, isLoading: apiLoading } = getAllCareers();
+  const [vacancies, setVacancies] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
   const [formData, setFormData] = useState({ name: "", email: "", coverLetter: "", cv: null });
   const [showModal, setShowModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // Submission loading
   const [errorSubmit, setErrorSubmit] = useState("");
 
-  const vacancies = [
-    { id: 1, title: "Civil Engineer", location: "Kuwait", type: "Full-time" },
-    { id: 2, title: "Site Supervisor", location: "Kuwait", type: "Full-time" },
-    { id: 3, title: "Project Manager", location: "Kuwait", type: "Full-time" },
-    { id: 4, title: "Electrical Engineer", location: "Kuwait", type: "Part-time" },
-    { id: 5, title: "Architect", location: "Kuwait", type: "Full-time" },
-  ];
+  React.useEffect(() => {
+    let combined = [...staticVacancies];
+    if (apiVacancies && Array.isArray(apiVacancies)) {
+      const allApi = apiVacancies.map(v => ({
+        ...v,
+        id: `api-${v.id}`,
+        // Ensure static ones default to active if not specified
+        isActive: v.isActive !== false
+      }));
+
+      // Filter out static ones that have the same title as an API one (de-duplication)
+      const apiTitles = new Set(allApi.map(v => v.title.toLowerCase()));
+      const filteredStatic = staticVacancies.map(v => ({
+        ...v,
+        isActive: true // Static vacancies are always active unless we change the data
+      })).filter(v => !apiTitles.has(v.title.toLowerCase()));
+
+      combined = [...allApi, ...filteredStatic];
+    } else {
+      // Fallback for static vacancies
+      combined = staticVacancies.map(v => ({ ...v, isActive: true }));
+    }
+    setVacancies(combined);
+  }, [apiVacancies]);
+
 
   const handleApply = (job) => {
     setSelectedJob(job);
@@ -64,27 +96,7 @@ export default function Careers() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="relative bg-blue-600 text-white py-24 text-center overflow-hidden">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-          className="max-w-3xl mx-auto px-4"
-        >
-          <h1 className="text-5xl font-extrabold mb-4">Join Our Team</h1>
-          <p className="text-lg text-blue-100">
-            Build your career with <span className="font-semibold">HAWK</span> —
-            where innovation meets opportunity.
-          </p>
-        </motion.div>
-        <motion.div
-          className="absolute bottom-0 left-0 w-full h-24 bg-white rounded-t-[50%]"
-          initial={{ y: 50 }}
-          animate={{ y: 0 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-        />
-      </section>
+      <HeroSlider locationId={5} staticSlides={defaultCareerSlide} height="h-[60vh]" />
 
       {/* Vacancies Section */}
       <section className="max-w-7xl mx-auto py-16 px-6">
@@ -94,7 +106,7 @@ export default function Careers() {
           transition={{ duration: 0.6 }}
           className="text-4xl font-bold text-center mb-12 text-gray-900"
         >
-          Current <span className="text-blue-600">Opportunities</span>
+          <span className="text-primary">Current Opportunities</span>
         </motion.h2>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -104,25 +116,36 @@ export default function Careers() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              whileHover={{ y: -5, scale: 1.03 }}
-              className="bg-white p-6 rounded-2xl shadow-md border border-gray-200 hover:shadow-xl transition-all"
+              whileHover={job.isActive ? { y: -5, scale: 1.03 } : {}}
+              className={`bg-white p-6 rounded-2xl shadow-md border border-gray-200 transition-all ${!job.isActive ? 'opacity-75 grayscale-[0.5]' : 'hover:shadow-xl'}`}
             >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="bg-blue-100 p-3 rounded-full">
-                  <Briefcase className="text-blue-600" />
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`${job.isActive ? 'bg-primary/10' : 'bg-gray-100'} p-3 rounded-full`}>
+                    <Briefcase className={job.isActive ? 'text-primary' : 'text-gray-400'} />
+                  </div>
+                  <h3 className={`text-xl font-bold ${job.isActive ? 'text-gray-800' : 'text-gray-500'}`}>{job.title}</h3>
                 </div>
-                <h3 className="text-xl font-bold text-gray-800">{job.title}</h3>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${job.isActive ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
+                  {job.isActive ? 'Active' : 'Closed'}
+                </span>
               </div>
+
               <div className="flex items-center gap-2 text-gray-600 mb-3">
                 <MapPin size={16} />
                 <span>{job.location}</span>
               </div>
               <p className="text-sm text-gray-500 mb-6">{job.type}</p>
+
               <button
-                onClick={() => handleApply(job)}
-                className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 transition"
+                onClick={() => job.isActive && handleApply(job)}
+                disabled={!job.isActive}
+                className={`w-full py-2.5 rounded-lg font-medium transition ${job.isActive
+                    ? "bg-primary text-white hover:bg-primary/90"
+                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  }`}
               >
-                Apply Now
+                {job.isActive ? "Apply Now" : "Vacancy Closed"}
               </button>
             </motion.div>
           ))}
@@ -167,7 +190,7 @@ export default function Careers() {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Your full name"
-                    className="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none"
                     required
                   />
                 </div>
@@ -182,7 +205,7 @@ export default function Careers() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="Your email address"
-                    className="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none"
                     required
                   />
                 </div>
@@ -211,7 +234,7 @@ export default function Careers() {
                     value={formData.coverLetter}
                     onChange={handleChange}
                     placeholder="Write your cover letter here..."
-                    className="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary outline-none"
                     required
                   ></textarea>
                 </div>
@@ -227,7 +250,7 @@ export default function Careers() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                    className="px-5 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition disabled:opacity-50"
                   >
                     {loading ? "Submitting..." : "Submit"}
                   </button>

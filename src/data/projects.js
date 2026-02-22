@@ -163,7 +163,7 @@ export const featuredProjects = [
 export const allProjects = [
     {
         title: "Sabah Al Salem University.",
-        images: [Uni],
+        images: [Uni], // Primary cover image
         category: "Educational",
         area: "Sabah Al Salem, Kuwait.",
         scope: "Multiple packages including Cement Plaster, Epoxy, Painting Works, Fair Face, Gypsum Partitions, Cement Board Works, Masonary, Water Proofing.",
@@ -174,37 +174,43 @@ export const allProjects = [
                 year: "2017",
                 contractor: "Mohammed Abdul Mohsin Al-kharafi Company",
                 area: "Cup 1 & 2",
-                scope: "Cement Plaster, Epoxy, Painting Works."
+                scope: "Cement Plaster, Epoxy, Painting Works.",
+                image: Uni1
             },
             {
                 year: "2017",
                 contractor: "Al-kharafi Construction Company",
                 area: "Parcel 800 Series",
-                scope: "Fair Face, Plaster, Internal & External Paint."
+                scope: "Fair Face, Plaster, Internal & External Paint.",
+                image: Uni2
             },
             {
                 year: "2018",
                 contractor: "Al-kharafi Construction Company",
                 area: "Parcel 800 Series",
-                scope: "Gypsum Partitions & Cement Board Works."
+                scope: "Gypsum Partitions & Cement Board Works.",
+                image: Uni3
             },
             {
                 year: "2017 & 2018",
                 contractor: "China State Construction Engineering Corporation Ltd.",
                 area: "SAAF Package 1",
-                scope: "Painting works, Cement Plaster."
+                scope: "Painting works, Cement Plaster.",
+                image: Uni4
             },
             {
                 year: "2018",
                 contractor: "Societe d'Entreprise et de Gestion S.E.G. - Qatar W.L.L.",
                 area: "SAAF Package 1 & 2",
-                scope: "Masonary, Plaster works & Fairface."
+                scope: "Masonary, Plaster works & Fairface.",
+                image: Uni5
             },
             {
                 year: "2018 & 2019",
                 contractor: "United Building Company",
                 area: "Cup 3",
-                scope: "Epoxy Coating, Epoxy Screed, Water Proofing, Plaster & Painting Works."
+                scope: "Epoxy Coating, Epoxy Screed, Water Proofing, Plaster & Painting Works.",
+                image: Uni
             }
         ]
     },

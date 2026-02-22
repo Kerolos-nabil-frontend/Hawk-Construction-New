@@ -30,10 +30,10 @@ const Services = () => {
   ];
 
   return (
-  <section className="relative py-28 bg-background-color text-text-color font-[Britannic Bold Regular] overflow-hidden">
+    <section className="relative py-28 bg-background text-text font-[Britannic Bold Regular] overflow-hidden">
       {/* Animated background glow */}
       <motion.div
-        className="absolute top-0 left-0 w-[600px] h-[600px] bg-blue-300/30 rounded-full blur-3xl"
+        className="absolute top-0 left-0 w-[600px] h-[600px] bg-primary/20 rounded-full blur-3xl"
         animate={{
           x: [0, 100, 0],
           y: [0, 50, 0],
@@ -42,7 +42,7 @@ const Services = () => {
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-200/20 rounded-full blur-3xl"
+        className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-secondary/20 rounded-full blur-3xl"
         animate={{
           x: [0, -60, 0],
           y: [0, -40, 0],
@@ -82,25 +82,25 @@ const Services = () => {
                 whileHover={{
                   scale: 1.07,
                   rotateY: 10,
-                  boxShadow: "0 15px 30px rgba(37, 99, 235, 0.2)",
+                  boxShadow: "0 15px 30px rgba(30, 66, 102, 0.2)",
                 }}
-                className="group bg-white/60 backdrop-blur-lg border border-blue-100 rounded-3xl shadow-md hover:shadow-2xl transition-all duration-500 p-10 cursor-pointer transform-gpu"
+                className="group bg-white/60 backdrop-blur-lg border border-gray-200 rounded-3xl shadow-md hover:shadow-2xl transition-all duration-500 p-10 cursor-pointer transform-gpu"
               >
                 <motion.div
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 1.2 }}
-                  className="w-20 h-20 mx-auto mb-6 flex items-center justify-center rounded-full bg-gradient-to-tr from-blue-500 to-blue-300 shadow-lg group-hover:from-blue-400 group-hover:to-blue-200"
+                  className="w-20 h-20 mx-auto mb-6 flex items-center justify-center rounded-full bg-gradient-to-tr from-primary to-secondary shadow-lg group-hover:from-secondary group-hover:to-primary"
                 >
                   <Icon className="w-10 h-10 text-white" />
                 </motion.div>
 
-                <h3 className="text-2xl font-bold text-gray-800 mb-3 group-hover:text-blue-600 transition-colors">
+                <h3 className="text-2xl font-bold text-gray-800 mb-3 group-hover:text-primary transition-colors">
                   {s.title}
                 </h3>
 
                 <p className="text-gray-600 leading-relaxed">{s.desc}</p>
 
-                
+
               </motion.div>
             );
           })}

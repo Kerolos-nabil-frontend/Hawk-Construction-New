@@ -42,7 +42,7 @@ body {
 }
 
 .about-swiper .swiper-pagination-progressbar-fill {
-  background: #22d3ee; /* cyan */
+  background: var(--secondary-color);
 }
 
 /* ============================= */
@@ -79,7 +79,7 @@ body {
 /* Hover effect (same as Hero) */
 .swiper-button-next:hover,
 .swiper-button-prev:hover {
-  color: #60a5fa; /* blue-400 */
+  color: var(--secondary-color);
   transform: scale(1.15);
 }
 

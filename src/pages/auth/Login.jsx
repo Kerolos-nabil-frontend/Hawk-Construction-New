@@ -23,9 +23,26 @@ export default function Login() {
         try {
             const response = await api.post('/Auth/login', formData);
             login(response.data.token);
-            navigate('/'); // Redirect to home or dashboard
+            navigate('/dashboard'); // Redirect to dashboard after login
         } catch (err) {
-            setError(err.response?.data || 'Login failed. Please check your credentials.');
+            console.error(err);
+            if (err.response?.data) {
+                if (typeof err.response.data === 'string') {
+                    setError(err.response.data);
+                } else if (err.response.data.message) {
+                    setError(err.response.data.message);
+                } else {
+                    if (err.response.status === 401 || err.response.status === 400) {
+                        setError('Invalid email or password.');
+                    } else {
+                        setError('Login failed. Please check your credentials.');
+                    }
+                }
+            } else if (err.request) {
+                setError('Network error: Unable to reach the server. Please ensure the backend is running.');
+            } else {
+                setError('An unexpected error occurred.');
+            }
         } finally {
             setLoading(false);
         }
@@ -43,10 +60,7 @@ export default function Login() {
                         Sign in to your account
                     </h2>
                     <p className="mt-2 text-center text-sm text-gray-600">
-                        Or{' '}
-                        <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
-                            create a new account
-                        </Link>
+                        Please enter your administrative credentials below
                     </p>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -59,7 +73,7 @@ export default function Login() {
                                 type="email"
                                 autoComplete="email"
                                 required
-                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                                 placeholder="Email address"
                                 value={formData.email}
                                 onChange={handleChange}
@@ -72,7 +86,7 @@ export default function Login() {
                                 type="password"
                                 autoComplete="current-password"
                                 required
-                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                                 placeholder="Password"
                                 value={formData.password}
                                 onChange={handleChange}
@@ -84,7 +98,7 @@ export default function Login() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
                         >
                             {loading ? 'Signing in...' : 'Sign in'}
                         </button>

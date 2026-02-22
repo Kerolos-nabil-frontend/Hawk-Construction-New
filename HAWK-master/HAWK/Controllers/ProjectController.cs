@@ -17,25 +17,34 @@ namespace HAWK.Controllers
         {
             _context = context;
         }
-        // GET: api/project
+
+        // ================= GET ALL =================
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var projects = await _context.Projects.ToListAsync();
+            var projects = await _context.Projects
+                .Include(p => p.Images)
+                .ToListAsync();
+
             return Ok(projects);
         }
-        // GET: api/project/{id}
+
+        // ================= GET BY ID =================
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var project = await _context.Projects.FindAsync(id);
+            var project = await _context.Projects
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(p => p.id == id);
+
             if (project == null)
                 return NotFound(new { message = "Project not found" });
 
             return Ok(project);
         }
-        // POST: api/project
-        [Authorize(Roles = "Admin")]
+
+        // ================= CREATE =================
+        [Authorize(Roles = "SuperAdmin,Admin,Main Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] ProjectCreateDto dto)
         {
@@ -44,7 +53,7 @@ namespace HAWK.Controllers
 
             var rootPath = Directory.GetCurrentDirectory();
 
-            // ================= IMAGE =================
+            // ===== MAIN IMAGE =====
             var imageFolder = Path.Combine(rootPath, "server/projects/images");
             if (!Directory.Exists(imageFolder))
                 Directory.CreateDirectory(imageFolder);
@@ -57,9 +66,9 @@ namespace HAWK.Controllers
                 await dto.image.CopyToAsync(stream);
             }
 
+            // ===== VIDEO (OPTIONAL) =====
             string? videoDbPath = "";
 
-            // ================= VIDEO (OPTIONAL) =================
             if (dto.video != null && dto.video.Length > 0)
             {
                 var videoFolder = Path.Combine(rootPath, "server/projects/videos");
@@ -84,39 +93,65 @@ namespace HAWK.Controllers
                 scope = dto.scope,
                 contractor = dto.contractor,
                 image = "/server/projects/images/" + imageName,
-                video = videoDbPath
+                video = videoDbPath,
+                owner = dto.owner,
+                category = dto.category,
+                linkedCertificate = dto.linkedCertificate
             };
 
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetAll), new { id = project.id }, project);
+            // ===== GALLERY IMAGES =====
+            if (dto.images != null && dto.images.Any())
+            {
+                foreach (var file in dto.images)
+                {
+                    var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                    var filePath = Path.Combine(imageFolder, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    _context.ProjectImages.Add(new ProjectImage
+                    {
+                        image = "/server/projects/images/" + fileName,
+                        ProjectId = project.id
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok(project);
         }
-        // PUT: api/project/{id}
-        [Authorize(Roles = "Admin")]
+
+        // ================= UPDATE =================
+        [Authorize(Roles = "SuperAdmin,Admin,Main Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromForm] ProjectCreateDto dto)
         {
-            var project = await _context.Projects.FindAsync(id);
+            var project = await _context.Projects
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(p => p.id == id);
+
             if (project == null)
                 return NotFound(new { message = "Project not found" });
 
             var rootPath = Directory.GetCurrentDirectory();
+            var imageFolder = Path.Combine(rootPath, "server/projects/images");
 
-            // ================= IMAGE (REPLACE IF UPLOADED, REQUIRED TO EXIST) =================
+            // ===== REPLACE MAIN IMAGE IF PROVIDED =====
             if (dto.image != null && dto.image.Length > 0)
             {
-                // delete old image
                 if (!string.IsNullOrEmpty(project.image))
                 {
                     var oldImagePath = Path.Combine(rootPath, project.image.TrimStart('/'));
                     if (System.IO.File.Exists(oldImagePath))
                         System.IO.File.Delete(oldImagePath);
                 }
-
-                var imageFolder = Path.Combine(rootPath, "server/projects/images");
-                if (!Directory.Exists(imageFolder))
-                    Directory.CreateDirectory(imageFolder);
 
                 var imageName = Guid.NewGuid() + Path.GetExtension(dto.image.FileName);
                 var imagePath = Path.Combine(imageFolder, imageName);
@@ -128,16 +163,10 @@ namespace HAWK.Controllers
 
                 project.image = "/server/projects/images/" + imageName;
             }
-            else if (string.IsNullOrEmpty(project.image))
-            {
-                // Image must exist
-                return BadRequest("Image is required.");
-            }
 
-            // ================= VIDEO (REPLACE IF UPLOADED, ELSE SET NULL) =================
+            // ===== REPLACE VIDEO IF PROVIDED =====
             if (dto.video != null && dto.video.Length > 0)
             {
-                // delete old video
                 if (!string.IsNullOrEmpty(project.video))
                 {
                     var oldVideoPath = Path.Combine(rootPath, project.video.TrimStart('/'));
@@ -159,40 +188,86 @@ namespace HAWK.Controllers
 
                 project.video = "/server/projects/videos/" + videoName;
             }
-            else
+
+            // ===== ADD NEW GALLERY IMAGES =====
+            if (dto.images != null && dto.images.Any())
             {
-                // If no video uploaded, set to null
-                project.video = "";
+                foreach (var file in dto.images)
+                {
+                    var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                    var filePath = Path.Combine(imageFolder, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    _context.ProjectImages.Add(new ProjectImage
+                    {
+                        image = "/server/projects/images/" + fileName,
+                        ProjectId = project.id
+                    });
+                }
             }
 
-            // ================= UPDATE OTHER FIELDS =================
+            // ===== UPDATE FIELDS =====
             project.title = dto.title;
             project.area = dto.area;
             project.scope = dto.scope;
             project.contractor = dto.contractor;
+            project.owner = dto.owner;
+            project.category = dto.category;
+            project.linkedCertificate = dto.linkedCertificate;
 
             await _context.SaveChangesAsync();
 
             return Ok(project);
         }
 
-
-
-        // DELETE: api/project/{id}
-        [Authorize(Roles = "Admin")]
+        // ================= DELETE =================
+        [Authorize(Roles = "SuperAdmin,Admin,Main Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var project = await _context.Projects.FindAsync(id);
+            var project = await _context.Projects
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(p => p.id == id);
+
             if (project == null)
                 return NotFound(new { message = "Project not found" });
 
-            // Delete image from server
-            var imagePath = Path.Combine(Directory.GetCurrentDirectory(), project.image.TrimStart('/'));
-            if (System.IO.File.Exists(imagePath))
-                System.IO.File.Delete(imagePath);
+            var rootPath = Directory.GetCurrentDirectory();
+
+            // Delete main image
+            if (!string.IsNullOrEmpty(project.image))
+            {
+                var imagePath = Path.Combine(rootPath, project.image.TrimStart('/'));
+                if (System.IO.File.Exists(imagePath))
+                    System.IO.File.Delete(imagePath);
+            }
+
+            // Delete video
+            if (!string.IsNullOrEmpty(project.video))
+            {
+                var videoPath = Path.Combine(rootPath, project.video.TrimStart('/'));
+                if (System.IO.File.Exists(videoPath))
+                    System.IO.File.Delete(videoPath);
+            }
+
+            // Delete gallery images
+            if (project.Images != null)
+            {
+                foreach (var img in project.Images)
+                {
+                    var imgPath = Path.Combine(rootPath, img.image.TrimStart('/'));
+                    if (System.IO.File.Exists(imgPath))
+                        System.IO.File.Delete(imgPath);
+                }
+                _context.ProjectImages.RemoveRange(project.Images);
+            }
 
             _context.Projects.Remove(project);
+
             await _context.SaveChangesAsync();
 
             return Ok(new { message = "Project deleted successfully" });

@@ -12,6 +12,10 @@ namespace HAWK.Models
         public string description { get; set; }
         [Required]
         public string image { get; set; }
-        public string category { get; set; } = "certificate"; // Default to certificate
+        public string? category { get; set; } // 'certificate' or 'reference'
+
+        // Linking
+        public string? linkedProjectIds { get; set; } // Comma separated IDs
+        public string? linkedServiceIds { get; set; } // Comma separated IDs
     }
 }

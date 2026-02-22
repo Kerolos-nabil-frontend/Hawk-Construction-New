@@ -62,9 +62,9 @@ export function SEOTester() {
         <CheckItem label="Robots Meta" check={checks.robotsMeta} />
       </div>
 
-      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded">
-        <p className="text-sm text-blue-900 font-semibold mb-2">Next Steps:</p>
-        <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+      <div className="mt-6 p-4 bg-primary/10 border border-primary/20 rounded">
+        <p className="text-sm text-primary font-semibold mb-2">Next Steps:</p>
+        <ol className="text-sm text-primary/80 space-y-1 list-decimal list-inside">
           <li>Fix any failed checks above</li>
           <li>Deploy site to public domain</li>
           <li>Go to: https://search.google.com/search-console</li>
@@ -81,19 +81,17 @@ function CheckItem({ label, check }: { label: string; check: SEOCheck }) {
   const isWarn = check.status.includes('⚠️');
 
   return (
-    <div className={`p-3 rounded border-l-4 ${
-      isPass ? 'bg-green-50 border-green-400' :
-      isWarn ? 'bg-yellow-50 border-yellow-400' :
-      'bg-red-50 border-red-400'
-    }`}>
+    <div className={`p-3 rounded border-l-4 ${isPass ? 'bg-green-50 border-green-400' :
+        isWarn ? 'bg-yellow-50 border-yellow-400' :
+          'bg-red-50 border-red-400'
+      }`}>
       <div className="flex items-start justify-between">
         <div>
           <p className="font-semibold text-gray-800">{label}</p>
-          <p className={`text-sm ${
-            isPass ? 'text-green-700' :
-            isWarn ? 'text-yellow-700' :
-            'text-red-700'
-          }`}>
+          <p className={`text-sm ${isPass ? 'text-green-700' :
+              isWarn ? 'text-yellow-700' :
+                'text-red-700'
+            }`}>
             {check.message}
           </p>
         </div>

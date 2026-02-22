@@ -10,59 +10,34 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 import "swiper/css/effect-fade";
 
-import Mall from "../../../assets/images/Mall.jpg";
-import Bank from "../../../assets/images/Bank.jpg";
-import Hospital from "../../../assets/images/Hospital.png";
-import Aknan from "../../../assets/videos/Aknan.mp4";
-import Messila from "../../../assets/videos/Messila-small.mp4";
+import { defaultSlides } from "../../../data/sliders";
 
-const HeroCarousel = () => {
+const HeroCarousel = ({ apiSliders }) => {
   const videoRefs = useRef([]);
   const swiperRef = useRef(null);
   const [muted, setMuted] = useState(true);
 
-  const slides = [
-    {
-      type: "video",
-      video: Aknan,
-      heading: "Aknan Tower: From Finish Works to Landmark",
-      text: "Our key of success is the integrated daily effort shared by everyone at Hawk Al Ahlia.",
-      button: "Our Services",
-      path: "/services",
-    },
-    {
-      type: "image",
-      image: Bank,
-      heading: "Building the Future",
-      text: "Our portfolio includes the development of commercial centers, banks, and hotels.",
-      button: "Explore Projects",
-      path: "/projects",
-    },
-    {
-      type: "image",
-      image: Hospital,
-      heading: "Innovative Engineering",
-      text: "We deliver quality and precision in every project we undertake.",
+  // Base URL for API images
+  const API_HOST = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:5026';
+
+  // Determine which slides to show
+  // Filter for home page sliders (Location ID 1 or missing/0)
+  const homeSliders = apiSliders?.filter(s => {
+    const loc = s.SliderLocationID || s.sliderLocationID || 1;
+    return loc == 1;
+  });
+
+  const slides = (homeSliders && homeSliders.length > 0)
+    ? homeSliders.map(s => ({
+      type: s.video ? "video" : "image",
+      image: s.image ? (s.image.startsWith('http') ? s.image : `${API_HOST}${s.image}`) : null,
+      video: s.video ? (s.video.startsWith('http') ? s.video : `${API_HOST}${s.video}`) : null,
+      heading: s.heading,
+      text: s.text,
       button: "Learn More",
-      path: "/about",
-    },
-    {
-      type: "video",
-      video: Messila,
-      heading: "Messila Beach",
-      text: "With a skilled team and proven track record, Hawk Al Ahlia continues to grow and innovate.",
-      button: "View Certificates",
-      path: "/certificates",
-    },
-    {
-      type: "image",
-      image: Mall,
-      heading: "Trusted Expertise",
-      text: "Delivering exceptional quality and sustainable infrastructure.",
-      button: "Contact Us",
-      path: "/contact",
-    },
-  ];
+      path: "/contact"
+    }))
+    : defaultSlides;
 
   useEffect(() => {
     const swiper = swiperRef.current?.swiper;
@@ -75,7 +50,7 @@ const HeroCarousel = () => {
         if (video) {
           if (i === currentIndex) {
             video.currentTime = 0;
-            video.play().catch(() => {});
+            video.play().catch(() => { });
           } else {
             video.pause();
             video.currentTime = 0;
@@ -180,7 +155,7 @@ const HeroCarousel = () => {
                   >
                     <Link
                       to={slide.path}
-                      className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition"
+                      className="inline-block px-6 py-3 bg-primary text-white font-semibold rounded-lg shadow-lg hover:bg-primary/90 transition"
                     >
                       {slide.button}
                     </Link>
@@ -202,10 +177,10 @@ const HeroCarousel = () => {
         ))}
 
         {/* Navigation Arrows */}
-        <div className="swiper-button-prev-custom absolute top-1/2 left-4 md:left-8 transform -translate-y-1/2 z-20 text-white text-3xl cursor-pointer hover:text-blue-400">
+        <div className="swiper-button-prev-custom absolute top-1/2 left-4 md:left-8 transform -translate-y-1/2 z-20 text-white text-3xl cursor-pointer hover:text-secondary">
           ‹
         </div>
-        <div className="swiper-button-next-custom absolute top-1/2 right-4 md:right-8 transform -translate-y-1/2 z-20 text-white text-3xl cursor-pointer hover:text-blue-400">
+        <div className="swiper-button-next-custom absolute top-1/2 right-4 md:right-8 transform -translate-y-1/2 z-20 text-white text-3xl cursor-pointer hover:text-secondary">
           ›
         </div>
       </Swiper>

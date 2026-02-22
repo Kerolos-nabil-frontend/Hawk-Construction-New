@@ -55,3 +55,87 @@ export function getAllSliders() {
     queryFn: fetchAllSliders,
   });
 }
+
+// projects
+const fetchAllProjects = async () => {
+  try {
+    const response = await api.get('/Project/GetAll');
+    return response.data;
+  } catch (error) {
+    if (error && typeof error === 'object') {
+      const err = error as any;
+      if (err.response) {
+        throw new Error(err.response.data?.message || 'API Error: ' + err.response.status);
+      } else if (err.request) {
+        throw new Error('No response from server. Check your network or ngrok tunnel.');
+      } else {
+        throw new Error('Request error: ' + (err.message || 'Unknown error'));
+      }
+    } else {
+      throw new Error('Unknown error occurred');
+    }
+  }
+}
+
+export function getAllProjects() {
+  return useQuery({
+    queryKey: ['all projects'],
+    queryFn: fetchAllProjects,
+  });
+}
+
+// careers
+const fetchAllCareers = async () => {
+  try {
+    const response = await api.get('/Career/GetAll');
+    return response.data;
+  } catch (error) {
+    if (error && typeof error === 'object') {
+      const err = error as any;
+      if (err.response) {
+        throw new Error(err.response.data?.message || 'API Error: ' + err.response.status);
+      } else if (err.request) {
+        throw new Error('No response from server. Check your network or ngrok tunnel.');
+      } else {
+        throw new Error('Request error: ' + (err.message || 'Unknown error'));
+      }
+    } else {
+      throw new Error('Unknown error occurred');
+    }
+  }
+}
+
+export function getAllCareers() {
+  return useQuery({
+    queryKey: ['all careers'],
+    queryFn: fetchAllCareers,
+  });
+}
+
+// services
+const fetchAllServices = async () => {
+  try {
+    const response = await api.get('/Service/GetAll');
+    return response.data;
+  } catch (error) {
+    if (error && typeof error === 'object') {
+      const err = error as any;
+      if (err.response) {
+        throw new Error(err.response.data?.message || 'API Error: ' + err.response.status);
+      } else if (err.request) {
+        throw new Error('No response from server. Check your network or ngrok tunnel.');
+      } else {
+        throw new Error('Request error: ' + (err.message || 'Unknown error'));
+      }
+    } else {
+      throw new Error('Unknown error occurred');
+    }
+  }
+}
+
+export function getAllServices() {
+  return useQuery({
+    queryKey: ['all services'],
+    queryFn: fetchAllServices,
+  });
+}
