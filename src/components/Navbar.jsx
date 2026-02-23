@@ -93,8 +93,7 @@ export default function Navbar({ direction = "ltr" }) {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`relative font-medium transition-colors duration-300 ${isActive ? "text-primary" : "text-gray-700 hover:text-primary"
-                  }`}
+                className={`relative font-medium nav-link-custom ${isActive ? "active" : ""}`}
               >
                 {item.name}
               </Link>
@@ -141,8 +140,7 @@ export default function Navbar({ direction = "ltr" }) {
                   key={item.name}
                   to={item.path}
                   onClick={() => setIsOpen(false)}
-                  className={`relative font-medium ${isActive ? "text-primary" : "text-gray-700 hover:text-primary"
-                    }`}
+                  className={`relative font-medium nav-link-custom ${isActive ? "active" : ""}`}
                 >
                   {item.name}
                 </Link>
