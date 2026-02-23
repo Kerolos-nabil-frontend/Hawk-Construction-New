@@ -59,8 +59,8 @@ export default function Services() {
           ...c,
           id: `api-${c.id}`,
           apiId: c.id,
-          image: getImageUrl(c.image),
-          category: c.category ? c.category.toLowerCase() : 'certificate'
+          image: getImageUrl(c.image || c.Image),
+          category: (c.category || c.Category || 'certificate').toLowerCase()
         }));
         combined = [...mapped, ...combined];
       }
@@ -184,10 +184,11 @@ export default function Services() {
         const matchesText = project.scope && project.scope.toLowerCase().includes(title.toLowerCase());
         if (matchesText) return true;
 
-        if (currentService?.linkedProjectIds) {
-          const linkedIds = Array.isArray(currentService.linkedProjectIds)
-            ? currentService.linkedProjectIds
-            : String(currentService.linkedProjectIds).split(',').filter(Boolean);
+        const rawProjIds = currentService?.linkedProjectIds || currentService?.LinkedProjectIds;
+        if (rawProjIds) {
+          const linkedIds = Array.isArray(rawProjIds)
+            ? rawProjIds
+            : String(rawProjIds).split(',').filter(Boolean);
 
           const projIdStr = String(project.id);
           const rawId = String(project.dbId || project.id).replace('api-', '');
@@ -204,8 +205,9 @@ export default function Services() {
         if (cert.description && cert.description.toLowerCase().includes(title.toLowerCase())) return true;
         if (cert.title && cert.title.toLowerCase().includes(title.toLowerCase())) return true;
         // Check explicit link via linkedServiceIds stored on the cert
-        if (cert.linkedServiceIds) {
-          const linkedIds = String(cert.linkedServiceIds).split(',').filter(Boolean);
+        const rawServiceIds = cert.linkedServiceIds || cert.LinkedServiceIds;
+        if (rawServiceIds) {
+          const linkedIds = String(rawServiceIds).split(',').filter(Boolean);
           // Strip prefixes so stored raw DB id "3" matches "api-3", "static-concrete-works", etc.
           const rawServiceId = String(serviceId).replace('api-', '').replace('static-', '').replace('dynamic-', '');
           if (linkedIds.includes(String(serviceId)) || linkedIds.includes(rawServiceId)) return true;

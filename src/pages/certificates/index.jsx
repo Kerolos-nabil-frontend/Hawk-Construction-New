@@ -37,13 +37,13 @@ const CertificatesPage = () => {
         ...c,
         id: `api-${c.id}`,
         apiId: c.id,
-        image: getImageUrl(c.image),
+        image: getImageUrl(c.image || c.Image),
         // Group all images into a single normalized array
         allImages: [
-          c.image,
+          c.image || c.Image,
           ...(c.images || c.Images || []).map(img => img?.image || img?.Image || img)
         ].filter(Boolean).map(path => getImageUrl(path)),
-        category: c.category ? c.category.toLowerCase() : 'certificate'
+        category: (c.category || c.Category || 'certificate').toLowerCase()
       }));
       combined = [...mapped, ...staticCertificates, ...references];
     }
@@ -123,8 +123,9 @@ const CertificatesPage = () => {
       const matchCount = searchTerms.reduce((acc, term) => projectTitle.includes(term) ? acc + 1 : acc, 0);
       if (matchCount >= 2) return true;
 
-      if (certificate.linkedProjectIds) {
-        const linkedIds = certificate.linkedProjectIds.split(',').filter(Boolean);
+      const rawLinkedProjIds = certificate.linkedProjectIds || certificate.LinkedProjectIds;
+      if (rawLinkedProjIds) {
+        const linkedIds = String(rawLinkedProjIds).split(',').filter(Boolean);
         const projIdStr = String(project.id).replace('dynamic-', '').replace('api-', '').replace('static-', '');
         if (linkedIds.includes(projIdStr) || linkedIds.includes(String(project.id))) return true;
       }
@@ -181,7 +182,7 @@ const CertificatesPage = () => {
     if (!item) return null;
 
     // 1. Get services explicitly linked via linkedServiceIds (Certificate -> Service)
-    const forwardIds = (item.linkedServiceIds || "").split(',').filter(Boolean);
+    const forwardIds = String(item.linkedServiceIds || item.LinkedServiceIds || "").split(',').filter(Boolean);
     const forwardServices = forwardIds.map(id => {
       return services.find(s =>
         String(s.id) === String(id) ||

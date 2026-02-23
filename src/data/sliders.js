@@ -15,7 +15,7 @@ export const defaultSlides = [
         type: "video",
         video: Aknan,
         heading: "Aknan Tower: From Finish Works to Landmark",
-        text: "Our key of success is the integrated daily effort shared by everyone at Hawk Al Ahlia.",
+        text: "Our Key of Success is the Integrated Daily Effort Shared by Everyone at Hawk Al Ahlia.",
         button: "Our Services",
         path: "/services",
         sliderLocationID: 1
@@ -25,7 +25,7 @@ export const defaultSlides = [
         type: "image",
         image: Bank,
         heading: "Building the Future",
-        text: "Our portfolio includes the development of commercial centers, banks, and hotels.",
+        text: "Our Portfolio Includes the Development of Commercial Centers, Banks, and Hotels.",
         button: "Explore Projects",
         path: "/projects",
         sliderLocationID: 1
@@ -35,7 +35,7 @@ export const defaultSlides = [
         type: "image",
         image: Hospital,
         heading: "Innovative Engineering",
-        text: "We deliver quality and precision in every project we undertake.",
+        text: "We Deliver Quality and Precision in Every Project We Undertake.",
         button: "Learn More",
         path: "/about",
         sliderLocationID: 1
@@ -45,7 +45,7 @@ export const defaultSlides = [
         type: "video",
         video: Messila,
         heading: "Messila Beach",
-        text: "With a skilled team and proven track record, Hawk Al Ahlia continues to grow and innovate.",
+        text: "With a Highly Skilled Team and Proven Track Record, Hawk Al Ahlia Continues to Grow and Innovate.",
         button: "View Certificates",
         path: "/certificates",
         sliderLocationID: 1
@@ -55,7 +55,7 @@ export const defaultSlides = [
         type: "image",
         image: Mall,
         heading: "Trusted Expertise",
-        text: "Delivering exceptional quality and sustainable infrastructure.",
+        text: "Delivering Exceptional Quality and Sustainable Infrastructure.",
         button: "Contact Us",
         path: "/contact",
         sliderLocationID: 1
@@ -84,7 +84,7 @@ export const aboutSlides = [
         type: "image",
         image: Directorate,
         heading: "Growth & Expansion",
-        text: "Our journey began with a focus on finishing works such as painting, gypsum plaster, cement plaster, and fair face. Over time, we expanded our capabilities to include exterior finish systems and exterior insulation finish systems.",
+        text: "Our Journey Began with a Focus on Finishing Works such as Painting, Gypsum Plaster, Cement Plaster, and Fair Face. Over Time, We Expanded Our Capabilities to Include Exterior Finish Systems and Exterior Insulation Finish Systems.",
         sliderLocationID: 2
     },
     {
@@ -92,7 +92,7 @@ export const aboutSlides = [
         type: "image",
         image: Bank,
         heading: "Global Reach",
-        text: "With a highly skilled team and a proven track record of successful project delivery, Hawk Al Ahlia continues to grow and evolve, and now we are also operating our New branch at Dubai U.A.E. maintaining all our services overseas from Kuwait to United Arab Emirates committed to quality, safety, innovation, and exceeding client expectations in every project we undertake.",
+        text: "With a Highly Skilled Team and a Proven Track Record of Successful Project Delivery, Hawk Al Ahlia continues to grow and evolve, and now we are also operating our New branch at Dubai U.A.E. maintaining all our services overseas from Kuwait to United Arab Emirates committed to quality, safety, innovation, and exceeding client expectations in every project we undertake.",
         sliderLocationID: 2
     }
 ];
@@ -103,7 +103,7 @@ export const projectSlides = [
         type: "image",
         image: Back,
         heading: "Projects",
-        text: "Explore our featured and completed projects below.",
+        text: "Explore Our Featured and Completed Projects below.",
         sliderLocationID: 3
     }
 ];

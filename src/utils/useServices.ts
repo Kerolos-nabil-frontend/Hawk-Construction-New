@@ -4,10 +4,21 @@ import api from './api';
 // certificates
 const fetchAllCertificates = async () => {
   try {
-    const response = await api.get('Certificate/GetAll');
-    return response.data;
+    const [certsRes, appsRes, offRes, refsRes] = await Promise.all([
+      api.get('Certificate/GetAll?type=certificate'),
+      api.get('Certificate/GetAll?type=approval'),
+      api.get('Certificate/GetAll?type=official_approval'),
+      api.get('Certificate/GetAll?type=reference')
+    ]);
+
+    // Combine all arrays into one
+    return [
+      ...(certsRes.data || []),
+      ...(appsRes.data || []),
+      ...(offRes.data || []),
+      ...(refsRes.data || [])
+    ];
   } catch (error) {
-    // Type assertion for AxiosError
     if (error && typeof error === 'object') {
       const err = error as any;
       if (err.response) {

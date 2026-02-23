@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import api from "../../utils/api";
 import HeroSlider from "../../components/HeroSlider";
 
@@ -23,6 +24,7 @@ export default function ContactUs() {
   const [errorSubmit, setErrorSubmit] = useState("");
   const [errors, setErrors] = useState({});
   const [contactInfo, setContactInfo] = useState(null);
+  const [activeMap, setActiveMap] = useState('kuwait');
 
   useEffect(() => {
     // Fetch contact details
@@ -277,6 +279,62 @@ export default function ContactUs() {
                 )}
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Interactive Map Section */}
+      <div className="max-w-7xl mx-auto px-6 mb-20 relative pt-12">
+        <div className="flex justify-center gap-4 mb-8">
+          <button
+            onClick={() => setActiveMap('kuwait')}
+            className={`px-8 py-3 rounded-2xl font-black transition-all shadow-lg ${activeMap === 'kuwait' ? 'bg-primary text-white scale-105' : 'bg-white text-gray-400 hover:bg-gray-100'}`}
+          >
+            Kuwait Office
+          </button>
+          <button
+            onClick={() => setActiveMap('uae')}
+            className={`px-8 py-3 rounded-2xl font-black transition-all shadow-lg ${activeMap === 'uae' ? 'bg-primary text-white scale-105' : 'bg-white text-gray-400 hover:bg-gray-100'}`}
+          >
+            Dubai Branch
+          </button>
+        </div>
+
+        <div className="w-full h-[500px] bg-gray-200 relative group overflow-hidden rounded-[40px] shadow-3xl border border-gray-100">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeMap}
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.4 }}
+              className="absolute inset-0"
+            >
+              <iframe
+                src={activeMap === 'kuwait'
+                  ? "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d111248.16335198!2d47.89311449553531!3d29.355523956485852!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3fcf9c83ce455983%3A0xc314841a12068e82!2sKuwait%20City!5e0!3m2!1sen!2skw!4v1700000000000!5m2!1sen!2skw"
+                  : "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d231154.5513837!2d55.20163353!3d25.143715299999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e5f43496ad9c645%3A0xbde66e5084295162!2sDubai!5e0!3m2!1sen!2skw!4v1700000000000!5m2!1sen!2skw"
+                }
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title={activeMap === 'kuwait' ? "HAWK Al Ahlia Kuwait Location" : "HAWK Al Ahlia UAE Location"}
+                className="grayscale hover:grayscale-0 transition-all duration-700"
+              />
+            </motion.div>
+          </AnimatePresence>
+
+          <div className="absolute top-10 left-10 bg-white/90 backdrop-blur-md p-6 rounded-[30px] shadow-2xl border border-white/20 hidden lg:block group-hover:translate-x-4 transition-transform duration-500 z-10">
+            <h4 className="font-black text-primary text-xl mb-1">
+              {activeMap === 'kuwait' ? 'Visit Our Headquarters' : 'Visit Our UAE Branch'}
+            </h4>
+            <p className="text-gray-500 text-sm font-medium">
+              {activeMap === 'kuwait' ? 'Kuwait City, Capital Governorate' : 'Dubai, United Arab Emirates'}
+            </p>
+            <div className="w-10 h-1 bg-secondary mt-3 rounded-full"></div>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
+import { Counter } from "../../components/Counter";
 import SEO from "../../components/SEO";
 import HeroSlider from "../../components/HeroSlider";
 import { aboutSlides as defaultAboutSlides } from "../../data/sliders";
@@ -29,8 +30,8 @@ export default function AboutIntro() {
             className="grid grid-cols-1 md:grid-cols-3 gap-8 text-white"
           >
             {[
-              { num: "20+", label: t("about.yearsExperience") },
-              { num: "100+", label: t("about.projectsDelivered") },
+              { num: "10+", label: t("about.yearsExperience") },
+              { num: "150+", label: t("about.projectsDelivered") },
               { num: "50+", label: t("about.clients") },
             ].map((item, index) => (
               <div
@@ -38,7 +39,7 @@ export default function AboutIntro() {
                 className="bg-white/5 backdrop-blur-md rounded-2xl p-8 hover:bg-white/10 transition-all text-center border border-white/10"
               >
                 <h3 className="text-4xl md:text-5xl font-bold text-secondary mb-2">
-                  {item.num}
+                  <Counter value={item.num} />
                 </h3>
                 <p className="text-lg text-gray-300">
                   {item.label}

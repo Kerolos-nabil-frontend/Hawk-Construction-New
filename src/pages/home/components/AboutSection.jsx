@@ -4,6 +4,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Counter } from "../../../components/Counter";
 import Airport from "../../../assets/images/Airport.jpg";
 import Court from "../../../assets/images/Court.jpg";
 import Palace from "../../../assets/images/Palace.jpg";
@@ -39,14 +40,18 @@ export default function About() {
               whileHover={{ scale: 1.05 }}
               className="p-6 bg-white shadow-lg rounded-xl text-center"
             >
-              <h3 className="text-3xl font-bold text-primary">20+</h3>
+              <h3 className="text-3xl font-bold text-primary">
+                <Counter value="10+" />
+              </h3>
               <p className="text-gray-500">Years Experience</p>
             </motion.div>
             <motion.div
               whileHover={{ scale: 1.05 }}
               className="p-6 bg-white shadow-lg rounded-xl text-center"
             >
-              <h3 className="text-3xl font-bold text-primary">150+</h3>
+              <h3 className="text-3xl font-bold text-primary">
+                <Counter value="150+" />
+              </h3>
               <p className="text-gray-500">Projects Completed</p>
             </motion.div>
           </div>

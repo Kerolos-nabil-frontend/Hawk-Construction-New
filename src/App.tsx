@@ -15,6 +15,7 @@ import { useGlobalSEO } from "./hooks/useGlobalSEO";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DynamicTheme from "./components/DynamicTheme";
+import { ScrollToTop } from "./components/ScrollToTop";
 
 import { useEffect } from "react";
 import { useTranslation } from 'react-i18next';
@@ -36,6 +37,7 @@ function App() {
       <DynamicTheme />
       <AuthProvider>
         <Navbar direction={direction} />
+        <ScrollToTop />
         <div className="p-2" dir={direction}>
           <Routes>
             <Route path="/" element={<Home />} />

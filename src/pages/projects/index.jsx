@@ -40,8 +40,8 @@ const Projects = () => {
         ...c,
         id: `api-${c.id}`,
         apiId: c.id,
-        image: getImageUrl(c.image),
-        category: c.category ? c.category.toLowerCase() : 'certificate'
+        image: getImageUrl(c.image || c.Image),
+        category: (c.category || c.Category || 'certificate').toLowerCase()
       }));
       combined = [...mapped, ...combined];
     }
@@ -141,18 +141,26 @@ const Projects = () => {
 
     // 1. Explicit link from Project -> Certificate
     const explicitCerts = certificates.filter(c => {
-      const cId = c.apiId || c.id;
-      return String(cId) === String(certIdFromProject);
+      if (!certIdFromProject) return false;
+      const cId = String(c.id);
+      const cApiId = String(c.apiId || "");
+      const targetId = String(certIdFromProject);
+
+      return cId === targetId ||
+        cApiId === targetId ||
+        cId.replace('api-', '') === targetId.replace('api-', '');
     });
 
     // 2. Explicit link from Certificate -> Project
     const reverseLinkedCerts = certificates.filter(c => {
-      const linkedProjIds = (c.linkedProjectIds || c.LinkedProjectIds || "").split(',').filter(Boolean);
+      const rawLinkedProjIds = c.linkedProjectIds || c.LinkedProjectIds || "";
+      const linkedProjIds = String(rawLinkedProjIds).split(',').filter(Boolean);
       // Strip prefixes so stored raw DB id "5" matches "api-5", "dynamic-5", etc.
       const rawProjId = String(projId).replace('api-', '').replace('dynamic-', '').replace('static-', '');
       return linkedProjIds.includes(String(projId)) ||
         linkedProjIds.includes(String(project.id)) ||
-        linkedProjIds.includes(rawProjId);
+        linkedProjIds.includes(rawProjId) ||
+        linkedProjIds.includes(String(project.id).replace('api-', '').replace('dynamic-', ''));
     });
 
     // 3. Text based matching (Title matching)
@@ -491,7 +499,27 @@ const Projects = () => {
                             </button>
                           ))
                         ) : (
-                          <span className="text-gray-400 text-xs italic">{selectedProject.scope || "Consultation & Execution"}</span>
+                          <div className="flex flex-wrap gap-2">
+                            {(selectedProject.scope || "Consultation & Execution").split(',').map((part, i) => {
+                              const trimmed = part.trim();
+                              const matchedService = services.find(s => trimmed.toLowerCase().includes((s.title || "").toLowerCase()));
+                              if (matchedService) {
+                                return (
+                                  <button
+                                    key={i}
+                                    onClick={() => {
+                                      setSelectedProject(null);
+                                      navigate('/services', { state: { openServiceTitle: matchedService.title } });
+                                    }}
+                                    className="text-primary font-bold hover:underline"
+                                  >
+                                    {trimmed}
+                                  </button>
+                                );
+                              }
+                              return <span key={i} className="text-gray-400 text-xs italic">{trimmed}{i < (selectedProject.scope || "").split(',').length - 1 ? ',' : ''}</span>;
+                            })}
+                          </div>
                         )}
                       </div>
                     </div>
