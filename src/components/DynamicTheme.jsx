@@ -8,11 +8,14 @@ const DynamicTheme = () => {
                 const response = await api.get('/Website/settings');
                 const settings = response.data;
 
-                if (settings.primaryColor) {
-                    document.documentElement.style.setProperty('--primary-color', settings.primaryColor);
+                const primary = settings.primaryColor || settings.PrimaryColor;
+                const secondary = settings.secondaryColor || settings.SecondaryColor;
+
+                if (primary) {
+                    document.documentElement.style.setProperty('--primary-color', primary);
                 }
-                if (settings.secondaryColor) {
-                    document.documentElement.style.setProperty('--secondary-color', settings.secondaryColor);
+                if (secondary) {
+                    document.documentElement.style.setProperty('--secondary-color', secondary);
                 }
             } catch (error) {
                 console.warn("Dynamic colors could not be loaded, using defaults.", error);

@@ -126,25 +126,35 @@ namespace HAWK.Controllers
         [HttpPost("settings")]
         public async Task<IActionResult> SaveSetting([FromBody] KeyValueDto dto)
         {
-            var setting = await _context.WebsiteContents
-                .FirstOrDefaultAsync(x => x.Key == dto.Key);
+            if (dto == null || string.IsNullOrEmpty(dto.Key))
+                return BadRequest("Invalid setting data: Key is required.");
 
-            if (setting == null)
+            try 
             {
-                setting = new Models.WebsiteSettings
+                var setting = await _context.WebsiteContents
+                    .FirstOrDefaultAsync(x => x.Key.ToLower() == dto.Key.ToLower());
+
+                if (setting == null)
                 {
-                    Key = dto.Key,
-                    Value = dto.Value
-                };
-                _context.WebsiteContents.Add(setting);
-            }
-            else
-            {
-                setting.Value = dto.Value;
-            }
+                    setting = new Models.WebsiteSettings
+                    {
+                        Key = dto.Key,
+                        Value = dto.Value ?? ""
+                    };
+                    _context.WebsiteContents.Add(setting);
+                }
+                else
+                {
+                    setting.Value = dto.Value ?? "";
+                }
 
-            await _context.SaveChangesAsync();
-            return Ok(new { message = "Setting saved successfully" });
+                await _context.SaveChangesAsync();
+                return Ok(new { message = $"Setting '{dto.Key}' saved successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error while saving setting: {ex.Message}");
+            }
         }
 
         [HttpGet("logo")]

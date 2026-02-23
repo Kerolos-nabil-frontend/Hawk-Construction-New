@@ -23,8 +23,8 @@ export default function SettingsManager() {
                 const response = await api.get('/Website/settings');
                 const data = response.data;
                 setSettings({
-                    primaryColor: data.primaryColor || defaultColors.primaryColor,
-                    secondaryColor: data.secondaryColor || defaultColors.secondaryColor,
+                    primaryColor: data.primaryColor || data.PrimaryColor || defaultColors.primaryColor,
+                    secondaryColor: data.secondaryColor || data.SecondaryColor || defaultColors.secondaryColor,
                 });
             } catch (error) {
                 console.error("Failed to fetch settings", error);
@@ -45,14 +45,21 @@ export default function SettingsManager() {
         setSaving(true);
         setMessage(null);
         try {
-            await api.post('/Website/settings', { key: 'primaryColor', value: settings.primaryColor });
-            await api.post('/Website/settings', { key: 'secondaryColor', value: settings.secondaryColor });
+            // Using PascalCase to match C# DTO strictly if needed
+            await api.post('/Website/settings', { Key: 'primaryColor', Value: settings.primaryColor });
+            await api.post('/Website/settings', { Key: 'secondaryColor', Value: settings.secondaryColor });
 
             setMessage({ type: 'success', text: 'Theme colors saved successfully!' });
             setTimeout(() => setMessage(null), 3000);
         } catch (error) {
-            console.error("Failed to save settings", error);
-            setMessage({ type: 'error', text: 'Failed to save theme colors.' });
+            console.error("Failed to save settings:", error);
+            const status = error.response?.status;
+            const errorMsg = error.response?.data?.message || error.response?.data || error.message;
+
+            setMessage({
+                type: 'error',
+                text: `Failed to save theme colors${status ? ` (${status})` : ''}. ${typeof errorMsg === 'string' ? errorMsg : ''}`
+            });
         } finally {
             setSaving(false);
         }
