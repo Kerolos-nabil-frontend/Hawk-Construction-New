@@ -275,9 +275,9 @@ const Projects = () => {
             {/* Close Button - Premium Corner Style */}
             <button
               onClick={() => setSelectedProject(null)}
-              className="absolute top-6 right-6 z-[130] bg-gray-900/90 text-white hover:bg-red-600 p-4 rounded-2xl shadow-2xl backdrop-blur-md transition-all duration-300 group hover:scale-110 active:scale-95"
+              className="absolute top-4 right-4 md:top-6 md:right-6 z-[130] bg-gray-900/90 text-white hover:bg-red-600 p-2 md:p-4 rounded-xl md:rounded-2xl shadow-2xl backdrop-blur-md transition-all duration-300 group hover:scale-110 active:scale-95"
             >
-              <X size={24} strokeWidth={3} className="group-hover:rotate-90 transition-transform duration-300" />
+              <X size={20} strokeWidth={3} className="md:w-6 md:h-6 group-hover:rotate-90 transition-transform duration-300" />
             </button>
 
             <div className="flex flex-col lg:flex-row h-full max-h-[90vh] overflow-hidden">

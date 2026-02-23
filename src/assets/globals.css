@@ -7,6 +7,27 @@
     --secondary-color: #EFCF96;
     --background-color: #f3f4f6;
     --text-color: #111827;
+
+    /* Swiper Pagination Global Colors */
+    --swiper-pagination-color: var(--primary-color);
+    --swiper-pagination-bullet-inactive-color: var(--primary-color);
+    --swiper-pagination-bullet-inactive-opacity: 0.3;
+    --swiper-pagination-bullet-size: 10px;
+    --swiper-pagination-bullet-horizontal-gap: 6px;
+}
+
+/* Global Swiper Pagination Overrides */
+.swiper-pagination-bullet {
+    background: var(--swiper-pagination-bullet-inactive-color) !important;
+    opacity: var(--swiper-pagination-bullet-inactive-opacity) !important;
+    transition: all 0.3s ease !important;
+}
+
+.swiper-pagination-bullet-active {
+    background: var(--swiper-pagination-color) !important;
+    opacity: 1 !important;
+    width: 24px !important;
+    border-radius: 5px !important;
 }
 
 
