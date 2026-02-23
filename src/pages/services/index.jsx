@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay, Navigation } from "swiper/modules";
 import "swiper/css";
@@ -19,7 +20,7 @@ import {
   Loader
 } from "lucide-react";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { allProjects as staticProjects } from "../../data/projects";
 import HeroSlider from "../../components/HeroSlider";
@@ -38,13 +39,34 @@ const defaultServiceSlide = [
 
 export default function Services() {
   const { t } = useTranslation();
+  const location = useLocation();
   const { data: apiProjects, isLoading: projectsLoading } = getAllProjects();
   const { data: apiServices, isLoading: servicesLoading } = getAllServices();
   const [selectedService, setSelectedService] = useState(null);
+  const [selectedServiceItem, setSelectedServiceItem] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedCertificate, setSelectedCertificate] = useState(null);
   const [relatedProjects, setRelatedProjects] = useState([]);
   const [relatedCertificates, setRelatedCertificates] = useState([]);
+  const [certificates, setCertificates] = useState([]);
   const { data: apiCertificates } = getAllCertificates();
+
+  useEffect(() => {
+    import('../../data/certificates').then(mod => {
+      let combined = [...mod.certificates, ...mod.references].map(c => ({ ...c, isStatic: true }));
+      if (apiCertificates && Array.isArray(apiCertificates)) {
+        const mapped = apiCertificates.map(c => ({
+          ...c,
+          id: `api-${c.id}`,
+          apiId: c.id,
+          image: getImageUrl(c.image),
+          category: c.category ? c.category.toLowerCase() : 'certificate'
+        }));
+        combined = [...mapped, ...combined];
+      }
+      setCertificates(combined);
+    });
+  }, [apiCertificates]);
 
   // Combine Static & Dynamic Services (Hidden ones are not filtered on public page unless we persist that state globally)
   // For now, we show all.
@@ -52,6 +74,17 @@ export default function Services() {
   if (apiServices && Array.isArray(apiServices)) {
     services = [...apiServices, ...staticServices];
   }
+
+  // Handle incoming open request from other pages (Projects page scope links)
+  useEffect(() => {
+    if (location.state?.openServiceTitle && services.length > 0) {
+      setTimeout(() => {
+        handleServiceClick(location.state.openServiceTitle);
+        // Clean up state so it doesn't re-open on every mount if user navigates back and forth
+        window.history.replaceState({}, document.title);
+      }, 100);
+    }
+  }, [location.state, services.length]);
 
   const resolveAssetUrl = (proj, path) => {
     if (!path) return "";
@@ -70,7 +103,35 @@ export default function Services() {
       if (!s.title) return false;
       return scopeLower.includes(s.title.toLowerCase());
     });
-    return Array.from(new Set([...explicitServices, ...matchedServices]));
+    const unique = Array.from(new Set([...explicitServices, ...matchedServices]));
+    return unique;
+  };
+
+  // Helper to get linked certificates for a project
+  const getLinkedCertificatesForProject = (project) => {
+    if (!project || !certificates.length) return [];
+
+    const projId = project.dbId || project.id;
+    const certIdFromProject = project.linkedCertificate || project.LinkedCertificate;
+
+    // 1. Explicit link from Project -> Certificate (by ID)
+    const explicitCerts = certificates.filter(c => {
+      const cId = c.apiId || c.id;
+      return String(cId) === String(certIdFromProject) || (c.id && String(c.id).replace('api-', '') === String(certIdFromProject));
+    });
+
+    // 2. Explicit link from Certificate -> Project (by linkedProjectIds)
+    const reverseLinkedCerts = certificates.filter(c => {
+      const linkedProjIds = (c.linkedProjectIds || c.LinkedProjectIds || "").split(',').filter(Boolean);
+      // Strip prefixes so stored raw DB id "5" matches "api-5", "dynamic-5", etc.
+      const rawProjId = String(projId).replace('api-', '').replace('dynamic-', '').replace('static-', '');
+      return linkedProjIds.includes(String(projId)) ||
+        linkedProjIds.includes(String(project.id)) ||
+        linkedProjIds.includes(rawProjId) ||
+        linkedProjIds.includes(String(project.id).replace('dynamic-', '').replace('api-', '').replace('static-', ''));
+    });
+
+    return Array.from(new Set([...explicitCerts, ...reverseLinkedCerts]));
   };
 
   const handleServiceClick = (title) => {
@@ -82,6 +143,7 @@ export default function Services() {
 
       // Find current service ID (to match linkedServiceIds in certs)
       const currentService = services.find(s => s.title === title);
+      setSelectedServiceItem(currentService);
       const serviceId = currentService?.id;
 
       // Combine Static & Dynamic Projects
@@ -137,26 +199,20 @@ export default function Services() {
       setRelatedProjects(filtered);
 
       // Filter Certificates
-      import('../../data/certificates').then(mod => {
-        let combinedCerts = [...mod.certificates];
-        if (apiCertificates && Array.isArray(apiCertificates)) {
-          const mapped = apiCertificates.map(c => ({ ...c, id: `api-${c.id}`, isDynamic: true }));
-          combinedCerts = [...mapped, ...combinedCerts];
+      const filteredCerts = certificates.filter(cert => {
+        // Check text match
+        if (cert.description && cert.description.toLowerCase().includes(title.toLowerCase())) return true;
+        if (cert.title && cert.title.toLowerCase().includes(title.toLowerCase())) return true;
+        // Check explicit link via linkedServiceIds stored on the cert
+        if (cert.linkedServiceIds) {
+          const linkedIds = String(cert.linkedServiceIds).split(',').filter(Boolean);
+          // Strip prefixes so stored raw DB id "3" matches "api-3", "static-concrete-works", etc.
+          const rawServiceId = String(serviceId).replace('api-', '').replace('static-', '').replace('dynamic-', '');
+          if (linkedIds.includes(String(serviceId)) || linkedIds.includes(rawServiceId)) return true;
         }
-
-        const filteredCerts = combinedCerts.filter(cert => {
-          // Check text match
-          if (cert.description && cert.description.toLowerCase().includes(title.toLowerCase())) return true;
-          if (cert.title && cert.title.toLowerCase().includes(title.toLowerCase())) return true;
-          // Check explicit link
-          if (cert.linkedServiceIds) {
-            const linkedIds = cert.linkedServiceIds.split(',').filter(Boolean);
-            if (linkedIds.includes(String(serviceId)) || linkedIds.includes(String(serviceId).replace('static-', ''))) return true;
-          }
-          return false;
-        });
-        setRelatedCertificates(filteredCerts);
+        return false;
       });
+      setRelatedCertificates(filteredCerts);
 
       // Scroll to the results for better UX
       setTimeout(() => {
@@ -198,7 +254,10 @@ export default function Services() {
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => handleServiceClick(service.title)}
+                onClick={() => {
+                  setSelectedServiceItem(service);
+                  handleServiceClick(service.title);
+                }}
                 className="p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition transform h-full flex flex-col items-center text-center cursor-pointer"
               >
                 <div className="p-5 rounded-full bg-primary/10 text-primary shadow-inner mb-4 flex items-center justify-center">
@@ -296,7 +355,7 @@ export default function Services() {
                         className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 transition hover:shadow-md"
                       >
                         <img
-                          src={cert.isDynamic ? getImageUrl(cert.image) : cert.image}
+                          src={cert.image}
                           alt={cert.title}
                           className="w-full h-44 object-cover rounded-xl mb-4"
                           onError={(e) => { e.target.src = "https://placehold.co/200x150?text=No+Image"; }}
@@ -337,7 +396,10 @@ export default function Services() {
                     scale: 1.05,
                     boxShadow: "0px 8px 25px rgba(30, 66, 102, 0.2)",
                   }}
-                  onClick={() => handleServiceClick(service.title)}
+                  onClick={() => {
+                    setSelectedServiceItem(service);
+                    handleServiceClick(service.title);
+                  }}
                   transition={{ duration: 0.3 }}
                   className={`p-8 rounded-xl border cursor-pointer transition-all text-center group ${isSelected
                     ? "bg-primary/10 border-primary ring-2 ring-primary/20"
@@ -396,14 +458,14 @@ export default function Services() {
 
       {/* Modal Overlay */}
       {selectedProject && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl transition-all duration-500 overflow-y-auto">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl transition-all duration-500 overflow-y-auto">
           <div className="bg-white rounded-[40px] shadow-3xl max-w-7xl w-full my-8 relative animate-fadeInUp overflow-hidden">
             {/* Close Button - Premium Corner Style */}
             <button
               onClick={() => setSelectedProject(null)}
-              className="absolute top-4 right-4 md:top-6 md:right-6 z-[130] bg-gray-900/90 text-white hover:bg-red-600 p-2 md:p-4 rounded-xl md:rounded-2xl shadow-2xl backdrop-blur-md transition-all duration-300 group hover:scale-110 active:scale-95"
+              className="absolute top-4 right-4 md:top-6 md:right-6 z-[230] close-premium-overlay p-2 md:p-4 rounded-xl md:rounded-2xl shadow-2xl backdrop-blur-md group hover:scale-110 active:scale-95"
             >
-              <X size={20} strokeWidth={3} className="md:w-6 md:h-6 group-hover:rotate-90 transition-transform duration-300" />
+              <X size={20} strokeWidth={3} className="md:w-6 md:h-6 transition-transform duration-300 group-hover:rotate-90" />
             </button>
 
             <div className="flex flex-col lg:flex-row h-full max-h-[90vh] overflow-hidden">
@@ -499,7 +561,11 @@ export default function Services() {
                       <div className="flex flex-wrap gap-2">
                         {getLinkedServicesForProject(selectedProject).length > 0 ? (
                           getLinkedServicesForProject(selectedProject).map((service, idx) => (
-                            <span key={idx} className="bg-white border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-black text-gray-700 hover:text-primary transition-colors cursor-default">
+                            <span
+                              key={idx}
+                              onClick={() => setSelectedServiceItem(service)}
+                              className="bg-white border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-black text-gray-700 hover:text-primary transition-colors cursor-pointer"
+                            >
                               {service.title}
                             </span>
                           ))
@@ -546,6 +612,44 @@ export default function Services() {
                     </div>
                   )}
 
+                  {getLinkedCertificatesForProject(selectedProject).length > 0 && (
+                    <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100 space-y-4">
+                      <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                        <span className="w-1.5 h-4 bg-secondary rounded-full"></span>
+                        Official Credentials
+                      </h3>
+                      <div className="space-y-3">
+                        {getLinkedCertificatesForProject(selectedProject).map((cert, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => {
+                              setSelectedProject(null);
+                              setSelectedCertificate(cert);
+                            }}
+                            className="w-full flex items-center gap-4 bg-white p-3 rounded-2xl border border-gray-100 hover:shadow-md transition-all group text-left cursor-pointer"
+                          >
+                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-50 flex-shrink-0">
+                              <img
+                                src={cert.image}
+                                alt={cert.title}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                                onError={(e) => { e.target.src = "https://placehold.co/100?text=Cert" }}
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-xs font-black text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">{cert.title}</h4>
+                              <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mt-0.5">
+                                {cert.category === "official_approval" ? "Official Approval" :
+                                  cert.category === "approval" ? "Client & Partner" :
+                                    cert.category || "Certificate"}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {selectedProject.description && (
                     <div className="pt-8 border-t border-gray-100">
                       <h3 className="text-lg font-black text-gray-900 mb-4 uppercase">Background</h3>
@@ -558,6 +662,108 @@ export default function Services() {
           </div>
         </div>
       )}
+      {/* Service Preview Modal */}
+      <AnimatePresence>
+        {selectedServiceItem && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl transition-all duration-500 overflow-y-auto">
+            <div className="bg-white rounded-[40px] shadow-3xl max-w-7xl w-full my-8 relative animate-fadeInUp overflow-hidden">
+              <button
+                onClick={() => setSelectedServiceItem(null)}
+                className="absolute top-4 right-4 md:top-6 md:right-6 z-[160] close-premium-overlay p-2 md:p-4 rounded-xl md:rounded-2xl shadow-2xl backdrop-blur-md group hover:scale-110 active:scale-95"
+              >
+                <X size={20} strokeWidth={3} className="md:w-6 md:h-6 transition-transform duration-300 group-hover:rotate-90" />
+              </button>
+
+              <div className="flex flex-col lg:flex-row h-full max-h-[90vh] overflow-hidden">
+                <div className="w-full lg:w-3/5 h-[450px] lg:h-auto bg-gray-100 relative overflow-hidden flex items-center justify-center p-12 lg:p-20">
+                  {selectedServiceItem.image ? (
+                    <img
+                      src={getImageUrl(selectedServiceItem.image)}
+                      alt={selectedServiceItem.title}
+                      className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
+                      onError={(e) => { e.target.src = "https://placehold.co/800x600?text=Service+Image"; }}
+                    />
+                  ) : (
+                    <div className="text-primary opacity-20 transform scale-[4]">
+                      {selectedServiceItem.icon || <Wrench size={48} />}
+                    </div>
+                  )}
+                </div>
+
+                <div className="w-full lg:w-2/5 p-8 lg:p-12 overflow-y-auto bg-white">
+                  <div className="space-y-8">
+                    <div>
+                      <h2 className="text-3xl lg:text-4xl font-black text-gray-900 leading-tight mb-4">
+                        {selectedServiceItem.title}
+                      </h2>
+                      <div className="w-20 h-1.5 bg-primary rounded-full"></div>
+                    </div>
+
+                    <div className="p-8 bg-gray-50 rounded-[32px] border border-gray-100 italic text-lg text-gray-600 leading-relaxed">
+                      "{selectedServiceItem.description || "We provide high-quality " + selectedServiceItem.title + " solutions tailored to your specific project needs."}"
+                    </div>
+
+                    {relatedProjects.length > 0 && selectedService === selectedServiceItem.title && (
+                      <div className="space-y-6 pt-8 border-t border-gray-100 text-center lg:text-left">
+                        <h3 className="text-xl font-black text-gray-900 uppercase">Featured Projects</h3>
+                        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                          {relatedProjects.map((project, idx) => (
+                            <div
+                              key={idx}
+                              onClick={() => setSelectedProject(project)}
+                              className="bg-white rounded-3xl p-5 flex gap-5 items-center border border-gray-100 hover:bg-gray-50/50 hover:shadow-xl transition-all duration-300 cursor-pointer group"
+                            >
+                              <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg flex-shrink-0">
+                                <img src={resolveAssetUrl(project, project.images?.[0])} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                              </div>
+                              <div className="flex-1 text-left">
+                                <h4 className="font-extrabold text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">{project.title}</h4>
+                                <p className="text-[11px] text-gray-500 font-medium mt-1 uppercase tracking-tighter">{project.category}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {relatedCertificates.length > 0 && (
+                      <div className="space-y-6 pt-8 border-t border-gray-100 text-center lg:text-left">
+                        <h3 className="text-xl font-black text-gray-900 uppercase">Related Credentials</h3>
+                        <div className="grid grid-cols-1 gap-4 max-h-[300px] overflow-y-auto pr-2">
+                          {relatedCertificates.map((cert, idx) => (
+                            <div
+                              key={idx}
+                              onClick={() => setSelectedCertificate(cert)}
+                              className="w-full flex items-center gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100 hover:shadow-lg transition-all group text-left cursor-pointer"
+                            >
+                              <div className="w-16 h-16 rounded-xl overflow-hidden bg-white shadow-sm flex-shrink-0">
+                                <img
+                                  src={cert.isDynamic ? getImageUrl(cert.image) : cert.image}
+                                  alt={cert.title}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                                  onError={(e) => { e.target.src = "https://placehold.co/100?text=Cert" }}
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-sm font-black text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">{cert.title}</h4>
+                                <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mt-1">
+                                  {cert.category === "official_approval" ? "Official Approval" :
+                                    cert.category === "approval" ? "Client & Partner" :
+                                      cert.category || "Certificate"}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

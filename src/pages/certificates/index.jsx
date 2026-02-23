@@ -20,13 +20,14 @@ const CertificatesPage = () => {
   const { data: apiServices, isLoading: servicesLoading } = getAllServices();
   const isLoading = certsLoading || projectsLoading || servicesLoading;
 
-  const [activeTab, setActiveTab] = useState("certificates"); // "certificates" or "approvals"
+  const [activeTab, setActiveTab] = useState("clients"); // "clients", "approvals", "certificates"
   const [services, setServices] = useState([]);
   const [certificates, setCertificates] = useState([]);
   const [allCertificates, setAllCertificates] = useState([]);
   const [displayReferences, setDisplayReferences] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [isReferenceOpen, setIsReferenceOpen] = useState(null);
+  const [selectedProject, setSelectedProject] = useState(null);
   const [relatedProjects, setRelatedProjects] = useState([]);
 
   useEffect(() => {
@@ -37,6 +38,11 @@ const CertificatesPage = () => {
         id: `api-${c.id}`,
         apiId: c.id,
         image: getImageUrl(c.image),
+        // Group all images into a single normalized array
+        allImages: [
+          c.image,
+          ...(c.images || c.Images || []).map(img => img?.image || img?.Image || img)
+        ].filter(Boolean).map(path => getImageUrl(path)),
         category: c.category ? c.category.toLowerCase() : 'certificate'
       }));
       combined = [...mapped, ...staticCertificates, ...references];
@@ -45,11 +51,15 @@ const CertificatesPage = () => {
   }, [apiCertificates]);
 
   useEffect(() => {
-    // 1. Set main display items (Certificates or Approvals)
-    if (activeTab === "approvals") {
+    // 1. Set main display items
+    if (activeTab === "clients") {
       setCertificates(allCertificates.filter(c => c.category === "approval"));
-    } else {
+    } else if (activeTab === "certificates") {
       setCertificates(allCertificates.filter(c => c.category === "certificate"));
+    } else if (activeTab === "approvals") {
+      setCertificates(allCertificates.filter(c => c.category === "official_approval"));
+    } else {
+      setCertificates([]);
     }
 
     // 2. Set Reference documents
@@ -75,8 +85,8 @@ const CertificatesPage = () => {
     if (apiProjects && Array.isArray(apiProjects)) {
       const mappedDynamic = apiProjects.map(p => {
         const rawImages = p.images || p.Images || [];
-        const mappedImages = rawImages.map(img => getImageUrl(typeof img === 'object' ? img.image : img));
-        const mainImage = getImageUrl(p.image);
+        const mappedImages = rawImages.map(img => getImageUrl(typeof img === 'object' ? (img.image || img.Image) : img));
+        const mainImage = getImageUrl(p.image || p.Image);
 
         return {
           ...p,
@@ -84,16 +94,17 @@ const CertificatesPage = () => {
           isStatic: false,
           image: mainImage,
           images: mappedImages.length > 0 ? mappedImages : [mainImage],
-          linkedCertificate: p.linkedCertificate
+          linkedCertificate: p.linkedCertificate || p.LinkedCertificate
         };
       });
       combinedProjects = [...mappedDynamic, ...combinedProjects];
     }
 
     return combinedProjects.filter(project => {
-      if (project.linkedCertificate) {
+      const projLinkedCert = project.linkedCertificate || project.LinkedCertificate;
+      if (projLinkedCert) {
         const certIdStr = String(certificate.id);
-        const projCertIdStr = String(project.linkedCertificate);
+        const projCertIdStr = String(projLinkedCert);
         if (certIdStr === projCertIdStr) return true;
         if (certIdStr.replace('api-', '') === projCertIdStr) return true;
         // Also check apiId if mapped
@@ -183,7 +194,9 @@ const CertificatesPage = () => {
     const certId = item.apiId || item.id;
     const backwardServices = services.filter(s => {
       const link = s.linkedCertificate || s.LinkedCertificate;
-      return String(link) === String(certId) || String(link) === String(item.id);
+      return String(link) === String(certId) ||
+        String(link) === String(item.id) ||
+        (item.id && String(link) === String(item.id).replace('api-', ''));
     });
 
     // Combine and unique
@@ -215,22 +228,31 @@ const CertificatesPage = () => {
       <div className="max-w-4xl mx-auto pt-16 px-4">
         <div className="flex justify-center mt-20 p-1 bg-gray-200/50 rounded-2xl backdrop-blur-sm shadow-inner overflow-hidden">
           <button
-            onClick={() => setActiveTab("certificates")}
-            className={`flex-1 py-4 px-8 rounded-xl font-bold transition-all duration-300 transform ${activeTab === "certificates"
-                ? "bg-white text-primary shadow-xl scale-100"
-                : "text-gray-500 hover:text-gray-700 hover:bg-white/30 scale-95"
+            onClick={() => setActiveTab("clients")}
+            className={`flex-1 py-4 px-2 rounded-xl font-bold transition-all duration-300 transform ${activeTab === "clients"
+              ? "bg-white text-primary shadow-xl scale-100"
+              : "text-gray-500 hover:text-gray-700 hover:bg-white/30 scale-95"
               }`}
           >
-            Certificates
+            Clients and Partners
           </button>
           <button
             onClick={() => setActiveTab("approvals")}
-            className={`flex-1 py-4 px-8 rounded-xl font-bold transition-all duration-300 transform ${activeTab === "approvals"
-                ? "bg-white text-primary shadow-xl scale-100"
-                : "text-gray-500 hover:text-gray-700 hover:bg-white/30 scale-95"
+            className={`flex-1 py-4 px-2 rounded-xl font-bold transition-all duration-300 transform ${activeTab === "approvals"
+              ? "bg-white text-primary shadow-xl scale-100"
+              : "text-gray-500 hover:text-gray-700 hover:bg-white/30 scale-95"
               }`}
           >
             Approvals
+          </button>
+          <button
+            onClick={() => setActiveTab("certificates")}
+            className={`flex-1 py-4 px-2 rounded-xl font-bold transition-all duration-300 transform ${activeTab === "certificates"
+              ? "bg-white text-primary shadow-xl scale-100"
+              : "text-gray-500 hover:text-gray-700 hover:bg-white/30 scale-95"
+              }`}
+          >
+            Certificates
           </button>
         </div>
       </div>
@@ -244,57 +266,113 @@ const CertificatesPage = () => {
         transition={{ duration: 0.5 }}
       >
         <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
-          {activeTab === "certificates" ? "Our Certificates" : "Our Approvals"}
+          {activeTab === "clients" && "Clients and Partners"}
+          {activeTab === "approvals" && "Official Approvals"}
+          {activeTab === "certificates" && "Our Certificates"}
         </h1>
         <p className="mt-4 text-gray-600 max-w-xl mx-auto px-4 italic font-medium">
-          {activeTab === "certificates"
-            ? "We are proud to hold international certifications that reflect our commitment to excellence, sustainability, and quality production."
-            : "Official approvals and recognition from major public works, governmental bodies, and educational institutions."}
+          {activeTab === "clients" && "Official recognition and trusted partnerships with major public works, governmental bodies, and educational institutions."}
+          {activeTab === "approvals" && "Verified credentials and official operational licenses."}
+          {activeTab === "certificates" && "International certifications reflecting our commitment to excellence, sustainability, and quality production."}
         </p>
       </motion.div>
 
       {/* Main Content Grid */}
       <div className="max-w-6xl mx-auto px-4 pb-20">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          <AnimatePresence mode='wait'>
-            {certificates.map((cert, index) => (
-              <motion.div
-                key={cert.id}
-                layout
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                whileHover={{ y: -10 }}
-                onClick={() => handleCertificateClick(index)}
-                className="group cursor-pointer bg-white shadow-md hover:shadow-2xl rounded-3xl overflow-hidden transition-all duration-500 border border-transparent hover:border-primary/20"
-              >
-                <div className="relative h-72 overflow-hidden bg-gray-100">
-                  <motion.img
-                    src={cert.image}
-                    alt={cert.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    onError={(e) => { e.target.src = "https://placehold.co/400x300?text=No+Image"; }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
-                    <span className="bg-white/90 text-primary px-6 py-2 rounded-full font-bold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                      View Details
-                    </span>
+        {activeTab === "approvals" && (
+          <div className="flex justify-center flex-col items-center mb-16">
+            {certificates.length > 0 ? (
+              <div className="w-full max-w-5xl">
+                <Swiper
+                  modules={[Navigation, Pagination, Autoplay]}
+                  navigation
+                  pagination={{ clickable: true }}
+                  autoplay={{ delay: 5000 }}
+                  className="rounded-[40px] shadow-2xl border border-gray-100 overflow-hidden bg-white p-2"
+                >
+                  {certificates.map((cert, index) => (
+                    <SwiperSlide key={cert.id || index}>
+                      <div className="relative group cursor-pointer h-[500px] md:h-[600px]" onClick={() => handleCertificateClick(index)}>
+                        <img
+                          src={cert.image}
+                          alt={cert.title}
+                          className="w-full h-full object-contain md:object-cover rounded-3xl"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-8 md:p-12 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                          <h2 className="text-3xl md:text-4xl font-black text-white mb-2">{cert.title}</h2>
+                          <p className="text-white/80 text-lg line-clamp-2 max-w-2xl italic">"{cert.description}"</p>
+                          <span className="mt-6 inline-flex items-center gap-2 text-primary font-black uppercase tracking-widest text-sm bg-white px-6 py-2 rounded-full w-fit shadow-lg">
+                            View Official Document
+                          </span>
+                        </div>
+                        {/* Always visible label for hero items */}
+                        <div className="absolute bottom-6 left-6 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 group-hover:opacity-0 transition-opacity">
+                          <span className="text-white font-bold">{cert.title}</span>
+                        </div>
+                      </div>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </div>
+            ) : (
+              <div className="max-w-4xl w-full bg-white p-6 rounded-[35px] shadow-xl border border-gray-100 overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1589149020108-8e67171d87e0?q=80&w=2000&auto=format&fit=crop"
+                  alt="Official Approvals"
+                  className="w-full h-auto rounded-2xl shadow-lg border border-gray-100"
+                  onError={(e) => { e.target.src = "https://placehold.co/1200x800?text=Official+Approvals"; }}
+                />
+                <div className="mt-6 text-center text-gray-400 text-sm italic font-medium">
+                  Verified through Official HAWK Al Ahlia Documentation Channels.
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Regular Grid for All Items (including approvals below hero if many, but here we just show all in grid for consistency if activeTab !== approvals or if user wants both) */}
+        {activeTab !== "approvals" && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <AnimatePresence mode='wait'>
+              {certificates.map((cert, index) => (
+                <motion.div
+                  key={cert.id}
+                  layout
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  whileHover={{ y: -10 }}
+                  onClick={() => handleCertificateClick(index)}
+                  className="group cursor-pointer bg-white shadow-md hover:shadow-2xl rounded-3xl overflow-hidden transition-all duration-500 border border-transparent hover:border-primary/20"
+                >
+                  <div className="relative h-72 overflow-hidden bg-gray-100">
+                    <motion.img
+                      src={cert.image}
+                      alt={cert.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      onError={(e) => { e.target.src = "https://placehold.co/400x300?text=No+Image"; }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+                      <span className="bg-white/90 text-primary px-6 py-2 rounded-full font-bold shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                        View Details
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="p-6 text-center">
-                  <h3 className="text-xl font-bold text-gray-900 group-hover:text-primary transition-colors">{cert.title}</h3>
-                  <div className="w-12 h-1 bg-primary/20 mx-auto mt-3 group-hover:w-24 transition-all duration-500" />
-                  <p className="text-gray-500 mt-3 text-sm line-clamp-2">{cert.description}</p>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+                  <div className="p-6 text-center">
+                    <h3 className="text-xl font-bold text-gray-900 group-hover:text-primary transition-colors">{cert.title}</h3>
+                    <div className="w-12 h-1 bg-primary/20 mx-auto mt-3 group-hover:w-24 transition-all duration-500" />
+                    <p className="text-gray-500 mt-3 text-sm line-clamp-2">{cert.description}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
 
         {certificates.length === 0 && (
           <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-dashed border-gray-300">
-            <p className="text-gray-400 font-medium">No items found in this category.</p>
+            <p className="text-gray-400 font-medium">No dynamic items found in this category yet.</p>
           </div>
         )}
       </div>
@@ -374,18 +452,37 @@ const CertificatesPage = () => {
             >
               <button
                 onClick={() => { setIsReferenceOpen(null); setRelatedProjects([]); }}
-                className="absolute top-6 right-6 text-gray-400 hover:text-red-500 z-[110] transition-colors p-2 bg-gray-100 rounded-full"
+                className="absolute top-6 right-6 z-[110] close-premium-overlay p-3 rounded-2xl shadow-sm group hover:scale-110 active:scale-95"
               >
-                <X size={28} />
+                <X size={24} strokeWidth={3} className="transition-transform duration-300 group-hover:rotate-90" />
               </button>
 
               <div className="flex flex-col md:flex-row h-full">
-                <div className="w-full md:w-1/2 h-[400px] md:h-auto bg-gray-50 flex items-center justify-center p-8">
-                  <img
-                    src={displayReferences[isReferenceOpen]?.image}
-                    alt={displayReferences[isReferenceOpen]?.title}
-                    className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
-                  />
+                <div className="w-full md:w-1/2 h-[500px] md:h-auto bg-[#f0f2f5] flex items-center justify-center p-4">
+                  {displayReferences[isReferenceOpen]?.allImages?.length > 1 ? (
+                    <Swiper
+                      modules={[Navigation, Pagination, Autoplay]}
+                      navigation
+                      pagination={{ clickable: true }}
+                      className="w-full h-full rounded-2xl overflow-hidden"
+                    >
+                      {displayReferences[isReferenceOpen]?.allImages.map((img, i) => (
+                        <SwiperSlide key={i}>
+                          <img
+                            src={img}
+                            alt={`${displayReferences[isReferenceOpen]?.title} - ${i + 1}`}
+                            className="w-full h-full object-contain"
+                          />
+                        </SwiperSlide>
+                      ))}
+                    </Swiper>
+                  ) : (
+                    <img
+                      src={displayReferences[isReferenceOpen]?.image}
+                      alt={displayReferences[isReferenceOpen]?.title}
+                      className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
+                    />
+                  )}
                 </div>
                 <div className="w-full md:w-1/2 p-10 overflow-y-auto bg-white">
                   <h2 className="text-3xl font-black text-gray-900">{displayReferences[isReferenceOpen]?.title}</h2>
@@ -401,12 +498,16 @@ const CertificatesPage = () => {
                       </h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {relatedProjects.map((project, idx) => (
-                          <div key={idx} className="bg-gray-50 rounded-2xl p-4 flex gap-4 items-center border border-gray-100 hover:shadow-md transition cursor-default">
+                          <div
+                            key={idx}
+                            onClick={() => setSelectedProject(project)}
+                            className="bg-gray-50 rounded-2xl p-4 flex gap-4 items-center border border-gray-100 hover:shadow-md transition cursor-pointer group"
+                          >
                             <div className="w-16 h-16 rounded-xl overflow-hidden shadow-sm">
-                              <img src={project.isStatic ? (project.images?.[0] || project.image) : project.image} className="w-full h-full object-cover" />
+                              <img src={project.isStatic ? (project.images?.[0] || project.image) : project.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h4 className="font-bold text-gray-900 truncate">{project.title}</h4>
+                              <h4 className="font-bold text-gray-900 truncate group-hover:text-primary transition-colors">{project.title}</h4>
                               <p className="text-xs text-gray-500 truncate">{project.scope}</p>
                             </div>
                           </div>
@@ -437,20 +538,46 @@ const CertificatesPage = () => {
             >
               <button
                 onClick={() => { setSelectedIndex(null); setRelatedProjects([]); }}
-                className="absolute top-8 right-8 text-gray-400 hover:text-red-500 z-[110] transition-all p-3 bg-gray-50 rounded-2xl shadow-sm"
+                className="absolute top-8 right-8 z-[110] close-premium-overlay p-3 rounded-2xl shadow-sm group hover:scale-110 active:scale-95"
               >
-                <X size={28} />
+                <X size={24} strokeWidth={3} className="transition-transform duration-300 group-hover:rotate-90" />
               </button>
 
               <div className="flex flex-col lg:flex-row h-full">
-                <div className="w-full lg:w-3/5 h-[450px] lg:h-auto bg-[#f8f9fa] flex items-center justify-center p-12 lg:p-20">
-                  <motion.img
-                    src={certificates[selectedIndex]?.image}
-                    alt={certificates[selectedIndex]?.title}
-                    className="max-w-full max-h-[70vh] object-contain rounded-2xl shadow-2xl"
-                  />
+                <div className="w-full lg:w-3/5 h-[500px] lg:h-auto bg-[#f8f9fa] flex items-center justify-center p-4 lg:p-10">
+                  {certificates[selectedIndex]?.allImages?.length > 1 ? (
+                    <Swiper
+                      modules={[Navigation, Pagination, Autoplay]}
+                      navigation
+                      pagination={{ clickable: true }}
+                      className="w-full h-full rounded-[30px] overflow-hidden shadow-2xl"
+                    >
+                      {certificates[selectedIndex]?.allImages.map((img, i) => (
+                        <SwiperSlide key={i}>
+                          <img
+                            src={img}
+                            alt={`${certificates[selectedIndex]?.title} - ${i + 1}`}
+                            className="w-full h-full object-contain"
+                          />
+                        </SwiperSlide>
+                      ))}
+                    </Swiper>
+                  ) : (
+                    <motion.img
+                      src={certificates[selectedIndex]?.image}
+                      alt={certificates[selectedIndex]?.title}
+                      className="max-w-full max-h-[70vh] object-contain rounded-2xl shadow-2xl"
+                    />
+                  )}
                 </div>
                 <div className="w-full lg:w-2/5 p-12 lg:p-16 overflow-y-auto bg-white">
+                  <div className="mb-6">
+                    <span className="text-[10px] font-black bg-primary/10 text-primary px-3 py-1 rounded-full uppercase tracking-widest border border-primary/20">
+                      {certificates[selectedIndex]?.category === "official_approval" ? "Official Approval" :
+                        certificates[selectedIndex]?.category === "approval" ? "Client & Partner" :
+                          certificates[selectedIndex]?.category || "Certificate"}
+                    </span>
+                  </div>
                   <h2 className="text-4xl font-black text-gray-900 leading-tight mb-8">{certificates[selectedIndex]?.title}</h2>
                   <p className="text-xl text-gray-500 font-medium italic border-l-4 border-primary/30 pl-6 mb-12">
                     "{certificates[selectedIndex]?.description}"
@@ -463,12 +590,16 @@ const CertificatesPage = () => {
                       <h3 className="text-2xl font-black text-gray-900 border-b border-gray-100 pb-4">Real-World Applications</h3>
                       <div className="space-y-4 max-h-[350px] overflow-y-auto pr-4">
                         {relatedProjects.map((project, idx) => (
-                          <div key={idx} className="bg-white rounded-3xl p-5 flex gap-5 items-center border border-gray-100 hover:bg-gray-50/50 hover:shadow-xl transition-all duration-300">
+                          <div
+                            key={idx}
+                            onClick={() => setSelectedProject(project)}
+                            className="bg-white rounded-3xl p-5 flex gap-5 items-center border border-gray-100 hover:bg-gray-50/50 hover:shadow-xl transition-all duration-300 cursor-pointer group"
+                          >
                             <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-lg flex-shrink-0">
-                              <img src={project.isStatic ? (project.images?.[0] || project.image) : project.image} className="w-full h-full object-cover" />
+                              <img src={project.isStatic ? (project.images?.[0] || project.image) : project.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
                             </div>
                             <div className="flex-1">
-                              <h4 className="font-extrabold text-gray-900 line-clamp-1">{project.title}</h4>
+                              <h4 className="font-extrabold text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">{project.title}</h4>
                               <p className="text-xs text-gray-500 font-medium mt-1 uppercase tracking-tighter">{project.scope}</p>
                             </div>
                           </div>
@@ -480,6 +611,113 @@ const CertificatesPage = () => {
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Project Preview Modal (Consistent with Projects page) */}
+      <AnimatePresence>
+        {selectedProject && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl transition-all duration-500 overflow-y-auto">
+            <div className="bg-white rounded-[40px] shadow-3xl max-w-7xl w-full my-8 relative animate-fadeInUp overflow-hidden">
+              <button
+                onClick={() => setSelectedProject(null)}
+                className="absolute top-4 right-4 md:top-6 md:right-6 z-[230] close-premium-overlay p-2 md:p-4 rounded-xl md:rounded-2xl shadow-2xl backdrop-blur-md group hover:scale-110 active:scale-95"
+              >
+                <X size={20} strokeWidth={3} className="md:w-6 md:h-6 transition-transform duration-300 group-hover:rotate-90" />
+              </button>
+
+              <div className="flex flex-col lg:flex-row h-full max-h-[90vh] overflow-hidden">
+                <div className="w-full lg:w-3/5 h-[450px] lg:h-auto bg-gray-100 relative overflow-hidden">
+                  <Swiper
+                    modules={[Navigation, Pagination, Autoplay]}
+                    pagination={{ clickable: true }}
+                    navigation
+                    loop={(selectedProject.images && selectedProject.images.length > 1) || selectedProject.video}
+                    className="w-full h-full"
+                  >
+                    {selectedProject.images?.map((img, i) => (
+                      <SwiperSlide key={`img-${i}`}>
+                        <div className="relative w-full h-full group">
+                          <img
+                            src={img.startsWith('http') || img.startsWith('/static') || img.startsWith('/') ? img : getImageUrl(img)}
+                            alt={selectedProject.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => { e.target.src = "https://placehold.co/1200x800?text=No+Image"; }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                        </div>
+                      </SwiperSlide>
+                    ))}
+
+                    {selectedProject.video && (
+                      <SwiperSlide key="video">
+                        <div className="w-full h-full bg-black flex items-center justify-center">
+                          <video className="w-full h-full object-cover lg:object-contain" controls playsInline>
+                            <source src={selectedProject.video.startsWith('http') ? selectedProject.video : getImageUrl(selectedProject.video)} type="video/mp4" />
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                      </SwiperSlide>
+                    )}
+                  </Swiper>
+                </div>
+
+                <div className="w-full lg:w-2/5 p-8 lg:p-12 overflow-y-auto bg-white scrollbar-thin scrollbar-thumb-gray-200">
+                  <div className="space-y-8">
+                    <div>
+                      <h2 className="text-3xl lg:text-4xl font-black text-gray-900 leading-tight mb-4">{selectedProject.title}</h2>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-primary/20">
+                          {selectedProject.category || 'General'}
+                        </span>
+                        {selectedProject.area && (
+                          <span className="bg-gray-100 text-gray-500 px-4 py-1.5 rounded-full text-xs font-bold border border-gray-200 uppercase tracking-tighter">
+                            {selectedProject.area}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-6">
+                      <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100 space-y-4">
+                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                          <span className="w-1.5 h-4 bg-primary rounded-full"></span> Details
+                        </h3>
+                        <div className="grid grid-cols-1 gap-4">
+                          {selectedProject.contractor && (
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-bold text-gray-400 uppercase">Main Contractor</span>
+                              <span className="text-base text-gray-800 font-bold">{selectedProject.contractor}</span>
+                            </div>
+                          )}
+                          {selectedProject.owner && (
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-bold text-gray-400 uppercase">Project Owner</span>
+                              <span className="text-base text-gray-800 font-bold">{selectedProject.owner}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100 space-y-4">
+                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                          <span className="w-1.5 h-4 bg-primary rounded-full"></span> Scope of Work
+                        </h3>
+                        <p className="text-sm text-gray-600 leading-relaxed">{selectedProject.scope || "No specific scope available."}</p>
+                      </div>
+                    </div>
+
+                    {selectedProject.description && (
+                      <div className="pt-8 border-t border-gray-100">
+                        <h3 className="text-lg font-black text-gray-900 mb-4 uppercase">Background</h3>
+                        <p className="text-gray-600 leading-relaxed text-base whitespace-pre-line">{selectedProject.description}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </AnimatePresence>
     </div>

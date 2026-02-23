@@ -34,17 +34,19 @@ export default function CertificatesManager() {
     const [allProjects, setAllProjects] = useState([]);
     const [allServices, setAllServices] = useState([]);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [extraImages, setExtraImages] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [certsRes, appsRes, refsRes, projectsRes, servicesRes] = await Promise.all([
-                api.get('/Certificate/GetAll?type=certificate'),
-                api.get('/Certificate/GetAll?type=approval'),
-                api.get('/Certificate/GetAll?type=reference'),
-                api.get('/Project/GetAll'),
-                api.get('/Service/GetAll')
+            const [certsRes, appsRes, offRes, refsRes, projectsRes, servicesRes] = await Promise.all([
+                api.get('Certificate/GetAll?type=certificate'),
+                api.get('Certificate/GetAll?type=approval'),
+                api.get('Certificate/GetAll?type=official_approval'),
+                api.get('Certificate/GetAll?type=reference'),
+                api.get('Project/GetAll'),
+                api.get('Service/GetAll')
             ]);
 
             const combinedProjects = [
@@ -63,7 +65,7 @@ export default function CertificatesManager() {
             const sCerts = staticCerts.map(c => ({ ...c, category: c.category || 'certificate', isStatic: true, id: `static-cert-${c.id}` }));
             const sRefs = staticRefs.map(r => ({ ...r, category: r.category || 'reference', isStatic: true, id: `static-ref-${r.id}` }));
 
-            setCertificates([...sCerts, ...certsRes.data, ...appsRes.data]);
+            setCertificates([...sCerts, ...certsRes.data, ...appsRes.data, ...offRes.data]);
             setReferences([...sRefs, ...refsRes.data]);
             setError(null);
         } catch (err) {
@@ -104,7 +106,7 @@ export default function CertificatesManager() {
         if (!window.confirm("Are you sure you want to delete this item?")) return;
 
         try {
-            await api.delete(`/Certificate/Delete/${id}`);
+            await api.delete(`Certificate/Delete/${id}`);
             if (category === 'reference') {
                 setReferences(prev => prev.filter(item => item.id !== id));
             } else {
@@ -146,6 +148,7 @@ export default function CertificatesManager() {
             linkedServiceIds: sIds,
         });
         setSelectedImage(null);
+        setExtraImages([]);
 
         if (item.isStatic) {
             setEditingItem(null); // Clone
@@ -175,6 +178,7 @@ export default function CertificatesManager() {
             linkedServiceIds: []
         });
         setSelectedImage(null);
+        setExtraImages([]);
         setShowForm(false);
         setIsSubmitting(false);
         setLegacyId(null);
@@ -191,6 +195,12 @@ export default function CertificatesManager() {
     const handleImageChange = (e) => {
         if (e.target.files && e.target.files[0]) {
             setSelectedImage(e.target.files[0]);
+        }
+    };
+
+    const handleExtraImagesChange = (e) => {
+        if (e.target.files) {
+            setExtraImages(Array.from(e.target.files));
         }
     };
 
@@ -214,13 +224,19 @@ export default function CertificatesManager() {
             data.append('image', selectedImage);
         }
 
+        if (extraImages.length > 0) {
+            extraImages.forEach(img => {
+                data.append('images', img);
+            });
+        }
+
         try {
             if (editingItem) {
-                await api.put(`/Certificate/Update/${editingItem.id}`, data, {
+                await api.put(`Certificate/Update/${editingItem.id}`, data, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
             } else {
-                await api.post('/Certificate/Create', data, {
+                await api.post('Certificate/Create', data, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
 
@@ -265,7 +281,7 @@ export default function CertificatesManager() {
                 <h2 className="text-xl font-bold text-gray-800">Certificates & References Manager</h2>
                 <button
                     onClick={() => setShowForm(true)}
-                    className="bg-primary text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-primary/90 transition"
+                    className="bg-primary text-white px-4 py-2 rounded flex items-center gap-2 btn-primary-dynamic"
                 >
                     <Plus size={18} /> Add New
                 </button>
@@ -281,7 +297,7 @@ export default function CertificatesManager() {
                 <div className="mb-8 bg-gray-50 p-6 rounded-lg border border-gray-200">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-lg font-semibold">{editingItem ? 'Edit Item' : 'New Item'}</h3>
-                        <button onClick={resetForm} className="text-gray-500 hover:text-red-500">
+                        <button onClick={resetForm} className="close-btn-dynamic">
                             <X size={24} />
                         </button>
                     </div>
@@ -294,8 +310,9 @@ export default function CertificatesManager() {
                                 onChange={handleInputChange}
                                 className="mt-1 block w-full border rounded p-2"
                             >
-                                <option value="certificate">Certificate</option>
-                                <option value="approval">Approval</option>
+                                <option value="certificate">Certificates Tab</option>
+                                <option value="approval">Clients and Partners Tab</option>
+                                <option value="official_approval">Approvals Tab</option>
                                 <option value="reference">Reference Document</option>
                             </select>
                         </div>
@@ -308,17 +325,75 @@ export default function CertificatesManager() {
                             <textarea required name="description" value={formData.description} onChange={handleInputChange} rows={3} className="mt-1 block w-full border rounded p-2" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Image</label>
+                            <label className="block text-sm font-medium text-gray-700">Main Display Image</label>
                             <input
                                 type="file"
                                 accept="image/*"
                                 onChange={handleImageChange}
                                 className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
-                                required={!editingItem} // Required only if creating new
+                                required={!editingItem}
                             />
-                            {editingItem && !selectedImage && (
-                                <p className="text-xs text-gray-500 mt-1">Leave empty to keep existing image</p>
+                            {selectedImage && (
+                                <div className="mt-2 relative w-32 h-32 border rounded-lg overflow-hidden bg-gray-50">
+                                    <img
+                                        src={URL.createObjectURL(selectedImage)}
+                                        className="w-full h-full object-cover"
+                                        alt="Main Preview"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedImage(null)}
+                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600"
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                </div>
                             )}
+                            {editingItem && !selectedImage && editingItem.image && (
+                                <div className="mt-2 w-32 h-32 border rounded-lg overflow-hidden bg-gray-50 opacity-60">
+                                    <img
+                                        src={editingItem.isStatic ? editingItem.image : getImageUrl(editingItem.image)}
+                                        className="w-full h-full object-cover"
+                                        alt="Current"
+                                    />
+                                    <p className="absolute bottom-0 left-0 right-0 bg-black/50 text-[8px] text-white text-center py-0.5">Current Image</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Additional Images (Optional)</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handleExtraImagesChange}
+                                className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-secondary/10 file:text-secondary hover:file:bg-secondary/20"
+                            />
+                            {extraImages.length > 0 && (
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                    {extraImages.map((file, idx) => (
+                                        <div key={idx} className="relative w-16 h-16 border rounded bg-gray-50">
+                                            <img
+                                                src={URL.createObjectURL(file)}
+                                                className="w-full h-full object-cover rounded"
+                                                alt={`Extra ${idx}`}
+                                            />
+                                            <span className="absolute -top-2 -right-2 bg-secondary text-white text-[8px] rounded-full px-1">
+                                                {idx + 1}
+                                            </span>
+                                        </div>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        onClick={() => setExtraImages([])}
+                                        className="text-[10px] text-red-500 font-bold hover:underline"
+                                    >
+                                        Clear All
+                                    </button>
+                                </div>
+                            )}
+                            <p className="text-[10px] text-gray-500 mt-1">Select multiple images if this certificate has pages or related documents.</p>
                         </div>
 
                         {/* Linking Section */}
@@ -383,7 +458,7 @@ export default function CertificatesManager() {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="px-4 py-2 bg-primary border border-transparent rounded-md text-sm font-medium text-white hover:bg-primary/90 flex items-center gap-2 disabled:opacity-70"
+                                className="px-4 py-2 bg-primary border border-transparent rounded-md text-sm font-medium text-white btn-primary-dynamic flex items-center gap-2 disabled:opacity-70"
                             >
                                 <Save size={18} />
                                 {isSubmitting ? 'Saving...' : (editingItem ? 'Update' : 'Save')}
@@ -417,15 +492,33 @@ export default function CertificatesManager() {
                             allItems.map((item, index) => (
                                 <tr key={item.id || index}>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <img
-                                            src={item.isStatic ? item.image : getImageUrl(item.image)}
-                                            alt={item.title}
-                                            className="h-12 w-12 object-cover rounded"
-                                            onError={(e) => { e.target.src = "https://placehold.co/100?text=Error"; }}
-                                        />
+                                        <div className="relative inline-block">
+                                            <img
+                                                src={item.isStatic ? item.image : getImageUrl(item.image)}
+                                                alt={item.title}
+                                                className="h-12 w-12 object-cover rounded shadow-sm"
+                                                onError={(e) => { e.target.src = "https://placehold.co/100?text=Error"; }}
+                                            />
+                                            {(item.images?.length > 0 || item.Images?.length > 0) && (
+                                                <span className="absolute -top-2 -right-2 bg-secondary text-white text-[10px] font-black px-1.5 py-0.5 rounded-full shadow-md border-2 border-white">
+                                                    +{item.images?.length || item.Images?.length}
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.title}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">{item.category}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-bold">{item.title}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <span className={`px-2 py-1 rounded-md text-[10px] font-black uppercase tracking-widest ${item.category === 'approval' ? 'bg-blue-50 text-blue-600' :
+                                            item.category === 'official_approval' ? 'bg-orange-50 text-orange-600' :
+                                                item.category === 'certificate' ? 'bg-green-50 text-green-600' :
+                                                    'bg-gray-50 text-gray-600'
+                                            }`}>
+                                            {item.category === 'approval' ? 'Clients/Partners' :
+                                                item.category === 'official_approval' ? 'Approvals' :
+                                                    item.category === 'certificate' ? 'Certificates' :
+                                                        item.category || 'Other'}
+                                        </span>
+                                    </td>
                                     <td className="px-6 py-4 text-xs text-gray-500">
                                         {(() => {
                                             // 1. Explicitly Linked Projects

@@ -4,7 +4,7 @@ import api from './api';
 // certificates
 const fetchAllCertificates = async () => {
   try {
-    const response = await api.get('/Certificate/GetAll');
+    const response = await api.get('Certificate/GetAll');
     return response.data;
   } catch (error) {
     // Type assertion for AxiosError
@@ -32,7 +32,7 @@ export function getAllCertificates() {
 //slider
 const fetchAllSliders = async () => {
   try {
-    const response = await api.get('/Slider/GetAll');
+    const response = await api.get('Slider/GetAll');
     return response.data;
   } catch (error) {
     if (error && typeof error === 'object') {
@@ -59,7 +59,7 @@ export function getAllSliders() {
 // projects
 const fetchAllProjects = async () => {
   try {
-    const response = await api.get('/Project/GetAll');
+    const response = await api.get('Project/GetAll');
     return response.data;
   } catch (error) {
     if (error && typeof error === 'object') {
@@ -87,7 +87,7 @@ export function getAllProjects() {
 // careers
 const fetchAllCareers = async () => {
   try {
-    const response = await api.get('/Career/GetAll');
+    const response = await api.get('Career/GetAll');
     return response.data;
   } catch (error) {
     if (error && typeof error === 'object') {
@@ -115,7 +115,7 @@ export function getAllCareers() {
 // services
 const fetchAllServices = async () => {
   try {
-    const response = await api.get('/Service/GetAll');
+    const response = await api.get('Service/GetAll');
     return response.data;
   } catch (error) {
     if (error && typeof error === 'object') {

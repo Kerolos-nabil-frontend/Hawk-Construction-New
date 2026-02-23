@@ -54,7 +54,7 @@ export default function SlidersManager() {
     const fetchSliders = async () => {
         setLoading(true);
         try {
-            const response = await api.get('/Slider/GetAll');
+            const response = await api.get('Slider/GetAll');
             const combinedStatic = [...defaultSlides, ...aboutSlides, ...projectSlides];
             console.log("Static Sliders Loaded:", combinedStatic);
             const staticSliders = combinedStatic.map(s => ({ ...s, isStatic: true, id: `static-slider-${s.id}` }));
@@ -124,9 +124,9 @@ export default function SlidersManager() {
 
         try {
             if (editingItem) {
-                await api.put(`/Slider/Update/${editingItem.id}`, data);
+                await api.put(`Slider/Update/${editingItem.id}`, data);
             } else {
-                await api.post('/Slider/Create', data);
+                await api.post('Slider/Create', data);
 
                 if (legacyId) {
                     setHiddenStaticIds(prev => [...prev, legacyId]);
@@ -174,7 +174,7 @@ export default function SlidersManager() {
 
         if (!window.confirm("Are you sure you want to delete this slider?")) return;
         try {
-            await api.delete(`/Slider/Delete/${id}`);
+            await api.delete(`Slider/Delete/${id}`);
             setSliders(sliders.filter(s => s.id !== id));
         } catch (error) {
             console.error("Error deleting slider", error);
@@ -245,7 +245,7 @@ export default function SlidersManager() {
                             resetForm();
                             setShowForm(true);
                         }}
-                        className="bg-primary text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-primary/90 transition"
+                        className="bg-primary text-white px-4 py-2 rounded flex items-center gap-2 btn-primary-dynamic"
                     >
                         <Plus size={18} /> Add Slider
                     </button>
@@ -268,7 +268,7 @@ export default function SlidersManager() {
                             onClick={() => setActiveTab(loc.id)}
                             className={`pb-2 px-4 font-medium transition-colors relative flex items-center gap-2 ${activeTab === loc.id
                                 ? 'text-primary border-b-2 border-primary'
-                                : 'text-gray-500 hover:text-gray-700'
+                                : 'text-gray-500 hover:text-primary transition-colors'
                                 }`}
                         >
                             {loc.name}
@@ -295,7 +295,7 @@ export default function SlidersManager() {
                             {editingItem ? 'Edit Slider' : 'New Slider'}
                             {user?.role && <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-normal">Role: {Array.isArray(user.role) ? user.role.join(', ') : user.role}</span>}
                         </h3>
-                        <button onClick={resetForm} className="text-gray-500 hover:text-red-500">
+                        <button onClick={resetForm} className="close-btn-dynamic">
                             <X size={24} />
                         </button>
                     </div>
@@ -382,7 +382,7 @@ export default function SlidersManager() {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="px-4 py-2 bg-primary border border-transparent rounded-md text-sm font-medium text-white hover:bg-primary/90 flex items-center gap-2 disabled:opacity-70"
+                                className="px-4 py-2 bg-primary border border-transparent rounded-md text-sm font-medium text-white btn-primary-dynamic flex items-center gap-2 disabled:opacity-70"
                             >
                                 <Save size={18} />
                                 {isSubmitting ? 'Saving...' : (editingItem ? 'Update Slider' : 'Create Slider')}

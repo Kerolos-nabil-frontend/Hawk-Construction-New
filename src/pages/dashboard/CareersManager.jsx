@@ -32,7 +32,7 @@ export default function CareersManager() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const res = await api.get('/Career/GetAll');
+            const res = await api.get('Career/GetAll');
             // Merge static and dynamic. Static first or last? User asked to "show the already coded ones".
             // Let's put static ones at the bottom or top.
             // Map static to have a flag and namespaced ID to avoid collisions with DB IDs
@@ -71,7 +71,7 @@ export default function CareersManager() {
         if (!window.confirm("Are you sure you want to delete this job posting?")) return;
 
         try {
-            await api.delete(`/Career/Delete/${id}`);
+            await api.delete(`Career/Delete/${id}`);
             setCareers(prev => prev.filter(item => item.id !== id));
         } catch (err) {
             console.error("Delete failed:", err);
@@ -129,9 +129,9 @@ export default function CareersManager() {
 
         try {
             if (editingItem) {
-                await api.put(`/Career/Update/${editingItem.id}`, formData);
+                await api.put(`Career/Update/${editingItem.id}`, formData);
             } else {
-                await api.post('/Career/Create', formData);
+                await api.post('Career/Create', formData);
                 if (legacyId) {
                     setHiddenStaticIds(prev => [...prev, legacyId]);
                 }
@@ -169,7 +169,7 @@ export default function CareersManager() {
                         resetForm();
                         setShowForm(true);
                     }}
-                    className="bg-primary text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-primary/90 transition"
+                    className="bg-primary text-white px-4 py-2 rounded flex items-center gap-2 btn-primary-dynamic"
                 >
                     <Plus size={18} /> Post Job
                 </button>
@@ -189,7 +189,7 @@ export default function CareersManager() {
                 >
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-lg font-semibold">{editingItem ? 'Edit Job Posting' : 'New Job Posting'}</h3>
-                        <button onClick={resetForm} className="text-gray-500 hover:text-red-500">
+                        <button onClick={resetForm} className="close-btn-dynamic">
                             <X size={24} />
                         </button>
                     </div>
@@ -229,7 +229,7 @@ export default function CareersManager() {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="px-4 py-2 bg-primary border border-transparent rounded-md text-sm font-medium text-white hover:bg-primary/90 flex items-center gap-2 disabled:opacity-70"
+                                className="px-4 py-2 bg-primary border border-transparent rounded-md text-sm font-medium text-white btn-primary-dynamic flex items-center gap-2 disabled:opacity-70"
                             >
                                 <Save size={18} />
                                 {isSubmitting ? 'Saving...' : (editingItem ? 'Update Job' : 'Post Job')}

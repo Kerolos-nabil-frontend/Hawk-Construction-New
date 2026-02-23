@@ -141,8 +141,8 @@ export default function Careers() {
                 onClick={() => job.isActive && handleApply(job)}
                 disabled={!job.isActive}
                 className={`w-full py-2.5 rounded-lg font-medium transition ${job.isActive
-                    ? "bg-primary text-white hover:bg-primary/90"
-                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  ? "bg-primary text-white btn-primary-dynamic"
+                  : "bg-gray-200 text-gray-500 cursor-not-allowed"
                   }`}
               >
                 {job.isActive ? "Apply Now" : "Vacancy Closed"}
@@ -170,7 +170,7 @@ export default function Careers() {
             >
               <button
                 onClick={() => setShowModal(false)}
-                className="absolute top-4 right-4 text-gray-600 hover:text-red-600 transition"
+                className="absolute top-4 right-4 close-btn-dynamic transition"
               >
                 <XCircle size={24} />
               </button>
@@ -250,7 +250,7 @@ export default function Careers() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-5 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition disabled:opacity-50"
+                    className="px-5 py-2 bg-primary text-white rounded-lg btn-primary-dynamic disabled:opacity-50"
                   >
                     {loading ? "Submitting..." : "Submit"}
                   </button>

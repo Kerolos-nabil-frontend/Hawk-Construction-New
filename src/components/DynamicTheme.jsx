@@ -5,7 +5,7 @@ const DynamicTheme = () => {
     useEffect(() => {
         const fetchColors = async () => {
             try {
-                const response = await api.get('/Website/settings');
+                const response = await api.get('Website/settings');
                 const settings = response.data;
 
                 const primary = settings.primaryColor || settings.PrimaryColor;

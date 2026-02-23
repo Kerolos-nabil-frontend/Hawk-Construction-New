@@ -21,6 +21,7 @@ namespace HAWK.dbcontext
         public DbSet<Career> Careers { get; set; }
         public DbSet<Service> Services { get; set; }
         public DbSet<Branch> Branches { get; set; }
+        public DbSet<CertificateImage> CertificateImages { get; set; }
 
     }
 }

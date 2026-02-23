@@ -155,7 +155,7 @@ const HeroCarousel = ({ apiSliders }) => {
                   >
                     <Link
                       to={slide.path}
-                      className="inline-block px-6 py-3 bg-primary text-white font-semibold rounded-lg shadow-lg hover:bg-primary/90 transition"
+                      className="inline-block px-6 py-3 bg-primary text-white font-semibold rounded-lg shadow-lg btn-primary-dynamic"
                     >
                       {slide.button}
                     </Link>

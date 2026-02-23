@@ -9,6 +9,7 @@ namespace HAWK.DTOs
         [Required]
         public string description { get; set; }
         public IFormFile? image { get; set; }
+        public List<IFormFile>? images { get; set; }
         public string? category { get; set; }
         public string? linkedProjectIds { get; set; }
         public string? linkedServiceIds { get; set; }

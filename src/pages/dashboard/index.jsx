@@ -73,12 +73,12 @@ export default function Dashboard() {
                         <button
                             key={item.id}
                             onClick={() => setActiveTab(item.id)}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === item.id
-                                ? 'bg-primary/10 text-primary'
-                                : 'text-gray-600 hover:bg-gray-50'
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 ${activeTab === item.id
+                                ? 'sidebar-active translate-x-1'
+                                : 'text-gray-600 sidebar-hover'
                                 }`}
                         >
-                            <item.icon size={20} />
+                            <item.icon size={20} className={activeTab === item.id ? 'text-white' : ''} />
                             {isSidebarOpen && <span className="font-medium">{item.label}</span>}
                         </button>
                     ))}

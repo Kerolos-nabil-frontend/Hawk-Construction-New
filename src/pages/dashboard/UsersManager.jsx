@@ -28,7 +28,7 @@ export default function UsersManager() {
         setLoading(true);
         setError(null);
         try {
-            const res = await api.get('/AdminManagement/GetAllUsers');
+            const res = await api.get('AdminManagement/GetAllUsers');
             setUsers(res.data || []);
         } catch (err) {
             console.error("Failed to fetch users", err);
@@ -37,7 +37,7 @@ export default function UsersManager() {
             setError(`Failed to fetch users list (${status || 'Network Error'}). ${detail ? detail : 'Please ensure you have sufficient permissions.'}`);
 
             if (status === 403) {
-                api.get('/AdminManagement/Ping')
+                api.get('AdminManagement/Ping')
                     .then(r => console.log("Ping success (authenticated but maybe wrong role):", r.data))
                     .catch(e => console.error("Ping failed (maybe not authenticated at all):", e));
             }
@@ -49,7 +49,7 @@ export default function UsersManager() {
     const handleDelete = async (userId) => {
         if (!window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) return;
         try {
-            await api.delete(`/AdminManagement/DeleteUser/${userId}`);
+            await api.delete(`AdminManagement/DeleteUser/${userId}`);
             setUsers(users.filter(u => u.id !== userId));
             setSuccess("User deleted successfully");
             setTimeout(() => setSuccess(null), 3000);
@@ -65,7 +65,7 @@ export default function UsersManager() {
         setIsSubmitting(true);
         setError(null);
         try {
-            await api.post('/AdminManagement/CreateAdmin', formData);
+            await api.post('AdminManagement/CreateAdmin', formData);
             setSuccess("Admin created successfully");
             setFormData({ email: "", password: "", fullName: "", role: "Admin" });
             setShowForm(false);
@@ -100,7 +100,7 @@ export default function UsersManager() {
                 </div>
                 <button
                     onClick={() => setShowForm(!showForm)}
-                    className="bg-primary text-white px-5 py-2.5 rounded-xl flex items-center gap-2 hover:opacity-90 transition shadow-lg shadow-primary/20 font-semibold"
+                    className="bg-primary text-white px-5 py-2.5 rounded-xl flex items-center gap-2 btn-primary-dynamic shadow-lg shadow-primary/20 font-semibold"
                 >
                     {showForm ? <X size={20} /> : <UserPlus size={20} />}
                     {showForm ? 'Cancel' : 'Add New Admin'}
@@ -185,7 +185,7 @@ export default function UsersManager() {
                             <button
                                 disabled={isSubmitting}
                                 type="submit"
-                                className="bg-primary text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition disabled:opacity-50 shadow-lg shadow-primary/20"
+                                className="bg-primary text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 btn-primary-dynamic disabled:opacity-50 shadow-lg shadow-primary/20"
                             >
                                 <Save size={20} />
                                 {isSubmitting ? 'Processing...' : 'Save Administrator'}

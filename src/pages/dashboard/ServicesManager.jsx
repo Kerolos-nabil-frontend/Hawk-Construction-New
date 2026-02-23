@@ -37,11 +37,13 @@ export default function ServicesManager() {
     const fetchServices = async () => {
         setLoading(true);
         try {
-            const [servicesRes, projectsRes, certsRes, refsRes] = await Promise.all([
-                api.get('/Service/GetAll'),
-                api.get('/Project/GetAll'),
-                api.get('/Certificate/GetAll?type=certificate'),
-                api.get('/Certificate/GetAll?type=reference')
+            const [servicesRes, projectsRes, certsRes, refsRes, appsRes, offRes] = await Promise.all([
+                api.get('Service/GetAll'),
+                api.get('Project/GetAll'),
+                api.get('Certificate/GetAll?type=certificate'),
+                api.get('Certificate/GetAll?type=reference'),
+                api.get('Certificate/GetAll?type=approval'),
+                api.get('Certificate/GetAll?type=official_approval')
             ]);
 
             const combinedProjects = [
@@ -53,7 +55,12 @@ export default function ServicesManager() {
             // Combine Certificates
             const sCerts = staticCertificates.map(c => ({ id: c.id, title: c.title, type: 'Static Certificate' }));
             const sRefs = staticReferences.map(r => ({ id: r.id, title: r.title, type: 'Static Reference' }));
-            const dCerts = (certsRes.data || []).map(c => ({ id: `api-${c.id || c.Id}`, title: c.title || c.Title, type: 'Dynamic Certificate' }));
+            const dCerts = [
+                ...(certsRes.data || []),
+                ...(refsRes.data || []),
+                ...(appsRes.data || []),
+                ...(offRes.data || [])
+            ].map(c => ({ id: `api-${c.id}`, title: c.title, type: `Dynamic ${c.category || 'Item'}` }));
             setAllCertificates([...sCerts, ...sRefs, ...dCerts]);
 
             // Map and normalize dynamic services to ensure 'id' property exists
@@ -112,7 +119,7 @@ export default function ServicesManager() {
         if (!window.confirm("Are you sure you want to delete this service?")) return;
 
         try {
-            await api.delete(`/Service/Delete/${id}`);
+            await api.delete(`Service/Delete/${id}`);
             setServices(prev => prev.filter(item => (item.id || item.Id) !== id));
         } catch (err) {
             console.error("Delete failed:", err);
@@ -219,9 +226,9 @@ export default function ServicesManager() {
             };
 
             if (editingItem) {
-                await api.put(`/Service/Update/${editingItem.id}`, data, config);
+                await api.put(`Service/Update/${editingItem.id}`, data, config);
             } else {
-                await api.post('/Service/Create', data, config);
+                await api.post('Service/Create', data, config);
             }
 
             if (legacyId) {
@@ -265,7 +272,7 @@ export default function ServicesManager() {
                 <h2 className="text-xl font-bold text-gray-800">Services Manager</h2>
                 <button
                     onClick={() => setShowForm(true)}
-                    className="bg-primary text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-primary/90 transition"
+                    className="bg-primary text-white px-4 py-2 rounded flex items-center gap-2 btn-primary-dynamic"
                 >
                     <Plus size={18} /> Add New Service
                 </button>
@@ -281,7 +288,7 @@ export default function ServicesManager() {
                 <div className="mb-8 bg-gray-50 p-6 rounded-lg border border-gray-200">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-lg font-semibold">{editingItem ? 'Edit Service' : 'New Service'}</h3>
-                        <button onClick={resetForm} className="text-gray-500 hover:text-red-500">
+                        <button onClick={resetForm} className="close-btn-dynamic">
                             <X size={24} />
                         </button>
                     </div>
@@ -360,7 +367,7 @@ export default function ServicesManager() {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="px-4 py-2 bg-primary border border-transparent rounded-md text-sm font-medium text-white hover:bg-primary/90 flex items-center gap-2 disabled:opacity-70"
+                                className="px-4 py-2 bg-primary border border-transparent rounded-md text-sm font-medium text-white btn-primary-dynamic flex items-center gap-2 disabled:opacity-70"
                             >
                                 <Save size={18} />
                                 {isSubmitting ? 'Saving...' : (editingItem ? 'Update' : 'Save')}

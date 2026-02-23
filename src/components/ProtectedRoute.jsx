@@ -42,7 +42,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
                         <p><strong>Required Roles:</strong> {allowedRoles.join(', ')}</p>
                         <p><strong>Your Role:</strong> {JSON.stringify(user?.role || 'None')}</p>
                     </div>
-                    <a href="/" className="inline-block px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 transition">
+                    <a href="/" className="inline-block px-4 py-2 bg-primary text-white rounded btn-primary-dynamic">
                         Go to Home
                     </a>
                 </div>

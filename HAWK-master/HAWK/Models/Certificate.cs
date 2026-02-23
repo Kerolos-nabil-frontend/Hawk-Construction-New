@@ -14,6 +14,9 @@ namespace HAWK.Models
         public string image { get; set; }
         public string? category { get; set; } // 'certificate' or 'reference'
 
+        // Multiple Images
+        public ICollection<CertificateImage> Images { get; set; } = new List<CertificateImage>();
+
         // Linking
         public string? linkedProjectIds { get; set; } // Comma separated IDs
         public string? linkedServiceIds { get; set; } // Comma separated IDs

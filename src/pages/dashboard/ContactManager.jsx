@@ -25,7 +25,7 @@ export default function ContactManager() {
 
     const fetchDetails = async () => {
         try {
-            const res = await api.get('/Contact/GetDetails');
+            const res = await api.get('Contact/GetDetails');
             if (res.data) {
                 setFormData(prev => ({
                     ...prev,
@@ -50,7 +50,7 @@ export default function ContactManager() {
         setSaving(true);
         setMessage({ type: '', text: '' });
         try {
-            await api.post('/Contact/UpdateDetails', formData);
+            await api.post('Contact/UpdateDetails', formData);
             setMessage({ type: 'success', text: 'Contact details updated successfully!' });
         } catch (err) {
             console.error(err);
@@ -313,7 +313,7 @@ export default function ContactManager() {
                     <button
                         type="submit"
                         disabled={saving}
-                        className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition flex items-center gap-2"
+                        className="bg-primary text-white px-6 py-2 rounded-lg btn-primary-dynamic flex items-center gap-2"
                     >
                         {saving ? <Loader className="animate-spin" size={20} /> : <Save size={20} />}
                         Save Changes

@@ -20,7 +20,7 @@ export default function SettingsManager() {
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const response = await api.get('/Website/settings');
+                const response = await api.get('Website/settings');
                 const data = response.data;
                 setSettings({
                     primaryColor: data.primaryColor || data.PrimaryColor || defaultColors.primaryColor,
@@ -46,8 +46,8 @@ export default function SettingsManager() {
         setMessage(null);
         try {
             // Using PascalCase to match C# DTO strictly if needed
-            await api.post('/Website/settings', { Key: 'primaryColor', Value: settings.primaryColor });
-            await api.post('/Website/settings', { Key: 'secondaryColor', Value: settings.secondaryColor });
+            await api.post('Website/settings', { Key: 'primaryColor', Value: settings.primaryColor });
+            await api.post('Website/settings', { Key: 'secondaryColor', Value: settings.secondaryColor });
 
             setMessage({ type: 'success', text: 'Theme colors saved successfully!' });
             setTimeout(() => setMessage(null), 3000);

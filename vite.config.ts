@@ -13,6 +13,20 @@ export default defineConfig({
     setupFiles: '.vitest/setup',
     include: ['**/test.{ts,tsx}']
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:5026',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/server': {
+        target: 'http://127.0.0.1:5026',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
   optimizeDeps: {
     force: true
   }

@@ -18,8 +18,8 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5026/api',
-  timeout: 10000, // avoid hanging requests
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  timeout: 10000,
 });
 
 api.interceptors.request.use(

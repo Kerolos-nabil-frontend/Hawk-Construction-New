@@ -122,7 +122,7 @@ export default function Navbar({ direction = "ltr" }) {
 
         {/* ✅ Mobile Menu Button */}
         <button
-          className="md:hidden text-gray-700 hover:text-primary"
+          className="md:hidden close-btn-dynamic"
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? <X size={28} /> : <Menu size={28} />}

@@ -39,7 +39,7 @@ export default function Register() {
                 UserRole: formData.role
             };
             console.log("Sending Register Payload:", payload); // Debugging
-            const response = await api.post('/Auth/register', payload);
+            const response = await api.post('Auth/register', payload);
             console.log("Register Response:", response);
             navigate('/login'); // Redirect to login after successful registration
         } catch (err) {
@@ -159,7 +159,7 @@ export default function Register() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
+                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary btn-primary-dynamic disabled:opacity-50"
                         >
                             {loading ? 'Creating account...' : 'Sign up'}
                         </button>

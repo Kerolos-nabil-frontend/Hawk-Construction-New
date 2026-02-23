@@ -37,7 +37,7 @@ namespace HAWK.Controllers
                 }
             }
 
-            var certificates = await query.ToListAsync();
+            var certificates = await query.Include(c => c.Images).ToListAsync();
             return Ok(certificates);
         }
         // GET: api/certificate/{id}
@@ -83,6 +83,26 @@ namespace HAWK.Controllers
             _context.Certificates.Add(certificate);
             await _context.SaveChangesAsync();
 
+            // Handle Multiple Images
+            if (dto.images != null && dto.images.Count > 0)
+            {
+                foreach (var img in dto.images)
+                {
+                    var imgFileName = Guid.NewGuid().ToString() + Path.GetExtension(img.FileName);
+                    var imgFilePath = Path.Combine(folderPath, imgFileName);
+                    using (var stream = new FileStream(imgFilePath, FileMode.Create))
+                    {
+                        await img.CopyToAsync(stream);
+                    }
+                    _context.CertificateImages.Add(new CertificateImage
+                    {
+                        CertificateId = certificate.id,
+                        image = "/server/" + imgFileName
+                    });
+                }
+                await _context.SaveChangesAsync();
+            }
+
             return CreatedAtAction(nameof(GetAll), new { id = certificate.id }, certificate);
         }
         // PUT: api/certificate/{id}
@@ -121,6 +141,26 @@ namespace HAWK.Controllers
             certificate.category = dto.category; // Update category
             certificate.linkedProjectIds = dto.linkedProjectIds;
             certificate.linkedServiceIds = dto.linkedServiceIds;
+
+            // Handle New Multiple Images
+            if (dto.images != null && dto.images.Count > 0)
+            {
+                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "server");
+                foreach (var img in dto.images)
+                {
+                    var imgFileName = Guid.NewGuid().ToString() + Path.GetExtension(img.FileName);
+                    var imgFilePath = Path.Combine(folderPath, imgFileName);
+                    using (var stream = new FileStream(imgFilePath, FileMode.Create))
+                    {
+                        await img.CopyToAsync(stream);
+                    }
+                    _context.CertificateImages.Add(new CertificateImage
+                    {
+                        CertificateId = certificate.id,
+                        image = "/server/" + imgFileName
+                    });
+                }
+            }
 
             await _context.SaveChangesAsync();
 

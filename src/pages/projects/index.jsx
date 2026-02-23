@@ -5,27 +5,48 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { X, Loader } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import SEO from "../../components/SEO";
-import { getAllProjects, getAllServices } from "../../utils/useServices";
+import HeroSlider from "../../components/HeroSlider";
+import { getAllCertificates, getAllProjects, getAllServices } from "../../utils/useServices";
+import { certificates as staticCerts, references as staticRefs } from "../../data/certificates";
 import { allProjects as staticProjects } from "../../data/projects";
 import { projectSlides as defaultProjectSlides } from "../../data/sliders";
 import { getImageUrl } from "../../utils/imageHelper";
-import HeroSlider from "../../components/HeroSlider";
 
 const Projects = () => {
-  const { data: apiProjects, isLoading: projectsLoading, error } = getAllProjects();
+  const navigate = useNavigate();
+  const { data: apiProjects, isLoading: projectsLoading } = getAllProjects();
   const { data: apiServices, isLoading: servicesLoading } = getAllServices();
-  const isLoading = projectsLoading || servicesLoading;
+  const { data: apiCertificates, isLoading: certsLoading } = getAllCertificates();
+  const isLoading = projectsLoading || servicesLoading || certsLoading;
 
   const [projects, setProjects] = useState([]);
   const [services, setServices] = useState([]);
+  const [certificates, setCertificates] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedCert, setSelectedCert] = useState(null);
   const [category, setCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  useEffect(() => {
+    let combined = [...staticCerts, ...staticRefs].map(c => ({ ...c, isStatic: true }));
+    if (apiCertificates && Array.isArray(apiCertificates)) {
+      const mapped = apiCertificates.map(c => ({
+        ...c,
+        id: `api-${c.id}`,
+        apiId: c.id,
+        image: getImageUrl(c.image),
+        category: c.category ? c.category.toLowerCase() : 'certificate'
+      }));
+      combined = [...mapped, ...combined];
+    }
+    setCertificates(combined);
+  }, [apiCertificates]);
 
   useEffect(() => {
     import('../../data/servicesData').then(mod => {
@@ -110,6 +131,47 @@ const Projects = () => {
     // Combine and unique
     const unique = Array.from(new Set([...explicitServices, ...matchedServices]));
     return unique;
+  };
+
+  // Helper to get linked certificates for a project
+  const getLinkedCertificatesForProject = (project) => {
+    if (!project || !certificates.length) return [];
+    const projId = project.dbId || project.id;
+    const certIdFromProject = project.linkedCertificate || project.LinkedCertificate;
+
+    // 1. Explicit link from Project -> Certificate
+    const explicitCerts = certificates.filter(c => {
+      const cId = c.apiId || c.id;
+      return String(cId) === String(certIdFromProject);
+    });
+
+    // 2. Explicit link from Certificate -> Project
+    const reverseLinkedCerts = certificates.filter(c => {
+      const linkedProjIds = (c.linkedProjectIds || c.LinkedProjectIds || "").split(',').filter(Boolean);
+      // Strip prefixes so stored raw DB id "5" matches "api-5", "dynamic-5", etc.
+      const rawProjId = String(projId).replace('api-', '').replace('dynamic-', '').replace('static-', '');
+      return linkedProjIds.includes(String(projId)) ||
+        linkedProjIds.includes(String(project.id)) ||
+        linkedProjIds.includes(rawProjId);
+    });
+
+    // 3. Text based matching (Title matching)
+    const matchedCerts = certificates.filter(c => {
+      const cTitle = (c.title || "").toLowerCase();
+      const pTitle = (project.title || "").toLowerCase();
+      if (!cTitle || !pTitle) return false;
+
+      // Check if project title contains certificate title or vice versa
+      if (pTitle.includes(cTitle) || cTitle.includes(pTitle)) return true;
+
+      // Term based match
+      const cTerms = cTitle.split(' ').filter(word => word.length > 3 && !['from', 'certificate', 'company', 'ministry'].includes(word));
+      if (cTerms.length === 0) return false;
+      const matchCount = cTerms.reduce((acc, term) => pTitle.includes(term) ? acc + 1 : acc, 0);
+      return matchCount >= 2;
+    });
+
+    return Array.from(new Set([...explicitCerts, ...reverseLinkedCerts, ...matchedCerts]));
   };
 
   if (isLoading) {
@@ -256,6 +318,49 @@ const Projects = () => {
                 <p className="text-gray-600 line-clamp-2 leading-relaxed">
                   {proj.scope}
                 </p>
+
+                {/* Linked Services (Scope of Work) Section */}
+                {(() => {
+                  const linkedServices = getLinkedServicesForProject(proj);
+                  if (linkedServices.length === 0) return null;
+                  return (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <span className="text-[10px] font-black text-primary/60 uppercase tracking-widest block w-full">Scope of Work</span>
+                      {linkedServices.map(service => (
+                        <button
+                          key={service.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate('/services', { state: { openServiceTitle: service.title } });
+                          }}
+                          className="text-[11px] font-bold text-secondary hover:text-white hover:bg-secondary bg-secondary/10 px-2 py-1 rounded-lg transition-all"
+                        >
+                          {service.title}
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })()}
+
+                {/* Certificate link in card */}
+                {(() => {
+                  const certs = getLinkedCertificatesForProject(proj);
+                  if (certs.length === 0) return null;
+                  return (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block w-full">Linked Certificate</span>
+                      {certs.map(c => (
+                        <button
+                          key={c.id}
+                          onClick={(e) => { e.stopPropagation(); setSelectedCert(c); }}
+                          className="text-[11px] font-bold text-primary hover:underline bg-primary/5 px-2 py-1 rounded"
+                        >
+                          {c.title}
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           ))}
@@ -275,9 +380,9 @@ const Projects = () => {
             {/* Close Button - Premium Corner Style */}
             <button
               onClick={() => setSelectedProject(null)}
-              className="absolute top-4 right-4 md:top-6 md:right-6 z-[130] bg-gray-900/90 text-white hover:bg-red-600 p-2 md:p-4 rounded-xl md:rounded-2xl shadow-2xl backdrop-blur-md transition-all duration-300 group hover:scale-110 active:scale-95"
+              className="absolute top-4 right-4 md:top-6 md:right-6 z-[130] close-premium-overlay p-2 md:p-4 rounded-xl md:rounded-2xl shadow-2xl backdrop-blur-md group hover:scale-110 active:scale-95"
             >
-              <X size={20} strokeWidth={3} className="md:w-6 md:h-6 group-hover:rotate-90 transition-transform duration-300" />
+              <X size={20} strokeWidth={3} className="md:w-6 md:h-6 transition-transform duration-300 group-hover:rotate-90" />
             </button>
 
             <div className="flex flex-col lg:flex-row h-full max-h-[90vh] overflow-hidden">
@@ -369,20 +474,58 @@ const Projects = () => {
                     <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100 space-y-4">
                       <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
                         <span className="w-1.5 h-4 bg-primary rounded-full"></span>
-                        Certified Solutions
+                        Scope of Work
                       </h3>
                       <div className="flex flex-wrap gap-2">
                         {getLinkedServicesForProject(selectedProject).length > 0 ? (
                           getLinkedServicesForProject(selectedProject).map((service, idx) => (
-                            <span key={idx} className="bg-white border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-black text-gray-700 hover:text-primary transition-colors cursor-default">
+                            <button
+                              key={idx}
+                              onClick={() => {
+                                setSelectedProject(null);
+                                navigate('/services', { state: { openServiceTitle: service.title } });
+                              }}
+                              className="bg-white border border-gray-200 px-3 py-1.5 rounded-xl text-xs font-black text-gray-700 hover:text-primary hover:border-primary transition-colors cursor-pointer"
+                            >
                               {service.title}
-                            </span>
+                            </button>
                           ))
                         ) : (
                           <span className="text-gray-400 text-xs italic">{selectedProject.scope || "Consultation & Execution"}</span>
                         )}
                       </div>
                     </div>
+
+                    {/* Linked Certificates Section in Modal */}
+                    {getLinkedCertificatesForProject(selectedProject).length > 0 && (
+                      <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100 space-y-4">
+                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                          <span className="w-1.5 h-4 bg-secondary rounded-full"></span>
+                          Official Credentials
+                        </h3>
+                        <div className="space-y-3">
+                          {getLinkedCertificatesForProject(selectedProject).map((cert, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => setSelectedCert(cert)}
+                              className="w-full flex items-center gap-4 bg-white p-3 rounded-2xl border border-gray-100 hover:shadow-md transition-all group text-left"
+                            >
+                              <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-50 flex-shrink-0">
+                                <img src={cert.image} alt={cert.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform" onError={(e) => { e.target.src = "https://placehold.co/100?text=Cert" }} />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-xs font-black text-gray-900 line-clamp-1 group-hover:text-primary transition-colors">{cert.title}</h4>
+                                <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mt-0.5">
+                                  {cert.category === "official_approval" ? "Official Approval" :
+                                    cert.category === "approval" ? "Client & Partner" :
+                                      cert.category || "Certificate"}
+                                </p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Specialized University Stages logic */}
@@ -427,6 +570,48 @@ const Projects = () => {
                       <p className="text-gray-600 leading-relaxed text-base whitespace-pre-line">{selectedProject.description}</p>
                     </div>
                   )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Certificate Detail Modal Overlay */}
+      {selectedCert && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/95 backdrop-blur-2xl transition-all duration-500">
+          <div className="bg-white rounded-[40px] shadow-3xl max-w-4xl w-full relative animate-fadeInUp overflow-hidden max-h-[92vh]">
+            <button
+              onClick={() => setSelectedCert(null)}
+              className="absolute top-6 right-6 z-[310] close-premium-overlay p-3 rounded-2xl shadow-sm group hover:scale-110 active:scale-95"
+            >
+              <X size={24} strokeWidth={3} className="transition-transform duration-300 group-hover:rotate-90" />
+            </button>
+
+            <div className="flex flex-col md:flex-row h-full">
+              <div className="w-full md:w-1/2 bg-gray-50 flex items-center justify-center p-10 h-[300px] md:h-auto">
+                <img
+                  src={selectedCert.image}
+                  alt={selectedCert.title}
+                  className="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
+                  onError={(e) => { e.target.src = "https://placehold.co/400x300?text=Certificate"; }}
+                />
+              </div>
+              <div className="w-full md:w-1/2 p-10 md:p-12 overflow-y-auto bg-white flex flex-col justify-center">
+                <div className="mb-6">
+                  <span className="text-[10px] font-black bg-primary/10 text-primary px-3 py-1 rounded-full uppercase tracking-widest border border-primary/20">
+                    {selectedCert.category || 'Official Credential'}
+                  </span>
+                </div>
+                <h2 className="text-3xl font-black text-gray-900 leading-tight mb-6">
+                  {selectedCert.title}
+                </h2>
+                <p className="text-lg text-gray-600 leading-relaxed italic border-l-4 border-primary/20 pl-6">
+                  {selectedCert.description}
+                </p>
+
+                <div className="mt-10 pt-8 border-t border-gray-100 italic text-[11px] text-gray-400">
+                  Confirmed through official HAWK Al Ahlia documentation.
                 </div>
               </div>
             </div>
